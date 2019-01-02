@@ -40,7 +40,7 @@ After running the script, the directory ``results`` should contain four director
 
 The iUC stands for connections between users, while sLE stands for step length estimation. 
 Each directory should contain results and figures for the evaluated approach. 
-After running the script, the console should present the summary of the obtained results:
+After running the script, the console should present list of the obtained results that are later sorted according to the RMSE error:
 
 ```
 Config                                  RMSE    AvgErr  Sigma   MaxErr  
@@ -57,7 +57,8 @@ iUC_true_mKP_1.0_sLE_true_run           4.65    2.11    4.15    42.64
 
 # License
 
-The code is available under the GPLv3 license. 
+The code is available under the GPLv3 license.
 For the convenience, the directory EXTERNAL contains the code of the g2o library (https://github.com/RainerKuemmerle/g2o)
  used for the optimization that is available mostly under the BSD license. 
 Some external dependencies of the g2o library are available under GPLv3, so please check EXTERNAL/g2o/README.md for details.
+If other licensing is needed please contact the author: michal.nowicki (at) put.poznan.pl.
