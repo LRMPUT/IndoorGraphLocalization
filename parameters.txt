@@ -1,0 +1,3 @@
+interUserConnections false
+stepLengthEstimation false
+mapKeepPercent 1.0
