@@ -95,6 +95,29 @@ public:
     // Optimize everything that was added to the graph
     void optimizeAll();
 
+    void getLastVertexPose(double &x, double &y, double &theta) {
+        int id = getIdOfLastVertexPose();
+        g2o::VertexSE2* v = static_cast<g2o::VertexSE2*>(optimizer.vertex(id));
+        x = v->estimate()[0];
+        y = v->estimate()[1];
+        theta = v->estimate()[2];
+        std::cout << "[getLastVertexPose] id: " << id << "| x = " << x << ", y = " << y << ", theta = " << theta << std::endl;
+    }
+
+    void getChi2OfEdges() {
+        for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
+
+            g2o::EdgeWKNN *e = dynamic_cast<g2o::EdgeWKNN *>(*it);
+            if (e)
+                std::cout << "EdgeWKNN: " << e->chi2() << std::endl;
+
+
+            g2o::EdgePDR *ePDR = dynamic_cast<g2o::EdgePDR *>(*it);
+            if (ePDR)
+                std::cout << "EdgePDR: " << ePDR->chi2() << std::endl;
+        }
+    }
+
 private:
 
     // Optimizer
