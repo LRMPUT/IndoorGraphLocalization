@@ -21,38 +21,16 @@ namespace g2o {
 		const VertexSE2 *v2 = static_cast<const VertexSE2 *>(_vertices[1]);
 		const VertexOne *v3 = static_cast<const VertexOne *>(_vertices[2]);
 
+		// Step length
 		double estimatedStepLength = v3->estimate()[0];
 
+		// Difference between poses
 		Eigen::Vector3d delta = (v1->estimate().inverse() * v2->estimate()).toVector();
 
-//		Eigen::Vector3d delta;
-//		delta[0] = v2->estimate()[0] - v1->estimate()[0];
-//		delta[1] = v2->estimate()[1] - v1->estimate()[1];
-//		delta[2] = v2->estimate()[2] - v1->estimate()[2];
-
-//		Eigen::Vector3d v1mv2;
-//		v1mv2[0] = v2->estimate()[0] - v1->estimate()[0];
-//		v1mv2[1] = v2->estimate()[1] - v1->estimate()[1];
-//		v1mv2[2] = v2->estimate()[2] - v1->estimate()[2];
-
-//		std::cout << "PDR: v1.inv() * v2:  " << delta[0] << " " << delta[1] << " " << normalize_theta(delta[2])*180.0/3.1415265 << " |" << delta[0]*delta[0] + delta[1]*delta[1] << std::endl;
-//		std::cout << "PDR: -v1 + v2:  " << v1mv2[0] << " " << v1mv2[1] << " " << normalize_theta(v1mv2[2])*180.0/3.1415265 << " |" << v1mv2[0]*v1mv2[0] + v1mv2[1]*v1mv2[1] << std::endl;
-//		std::cout << " ------ " << std::endl;
-
+		// Average angles of both poses
 		double averageAngle = (v1->estimate()[2] + v2->estimate()[2]) / 2.0;
-//		double averageAngle = normalize_theta(-v1->estimate()[2] + v2->estimate()[2]) / 2.0;
-//        double averageAngle = normalize_theta(v1->estimate()[2] + v2->estimate()[2]) / 2.0;
-//        double averageAngle = normalize_theta(delta[2]) / 2.0;
-//		double averageAngle = v1->estimate()[2];
 
-
-//		std::cout << "PDR: " << v1->estimate()[2] *180.0/3.1415265 << " " << v2->estimate()[2] *180.0/3.1415265
-//		    << " avg: " << averageAngle*180.0/3.1415265 <<  std::endl;
-
-//		_error[0] = 0;//delta[0] - estimatedStepLength * _measurement[0] * cos(v2->estimate()[2]);
-//		_error[1] = 0;//delta[1] - estimatedStepLength * _measurement[0] * sin(v2->estimate()[2]);
-//		_error[2] = normalize_theta(delta[2] - _measurement[1]);
-
+		// Error
 		_error[0] = delta[0] - estimatedStepLength * _measurement[0] * cos(averageAngle);
 		_error[1] = delta[1] - estimatedStepLength * _measurement[0] * sin(averageAngle);
         _error[2] = normalize_theta(delta[2] - _measurement[1]);
