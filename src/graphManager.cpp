@@ -213,6 +213,29 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
         informationMatrix(0,0) = weightXY;
         informationMatrix(1,1) = weightXY;
         informationMatrix(2,2) = weightTheta;
+
+        // TODO: EXPERIMENTAL
+//        Eigen::Matrix3d covarianceDist;
+//        covarianceDist.setZero();
+//        covarianceDist(0,0) = weightXY * cos(averageAngle) * cos(averageAngle);
+//        covarianceDist(0,1) = weightXY * cos(averageAngle) * sin(averageAngle);
+//        covarianceDist(1,0) = weightXY * cos(averageAngle) * sin(averageAngle);
+//        covarianceDist(1,1) = weightXY * sin(averageAngle) * sin(averageAngle);
+//
+//        Eigen::Vector3d jacobianAngle;
+//        jacobianAngle[0] = - 0.5 * estimatedStepLength * freqTime * sin (averageAngle);
+//        jacobianAngle[1] = 0.5 * estimatedStepLength * freqTime * cos (averageAngle);
+//        jacobianAngle[2] = 1.0;
+//        Eigen::Matrix3d covarianceAngle = jacobianAngle * weightTheta * jacobianAngle.transpose();
+//
+//        Eigen::Matrix3d covariance = covarianceDist + covarianceAngle;
+//        informationMatrix = covariance.inverse();
+//
+//        std::cout << "\tcovariance: " << std::endl << covariance << std::endl;
+//
+//        std::cout << "\tinformationMatrix: " << std::endl << informationMatrix << std::endl;
+
+
         e->setInformation(informationMatrix);
 
         // Adding the edge
@@ -252,5 +275,5 @@ void GraphManager::optimizeAll() {
         g2o::OptimizableGraph::Edge *e =static_cast<g2o::OptimizableGraph::Edge *>(*it);
         e->setLevel(0);
     }
-    optimize(15);
+    optimize(150);
 }
