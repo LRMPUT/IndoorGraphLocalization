@@ -89,6 +89,11 @@ void computeAndAddEdgePDR(GraphManager &graphManager, vector<double> &accWindow,
 
 int main() {
 
+
+//    OpenABLE openABLE(argv[1]);
+//    openABLE.compute_OpenABLE();
+//    openABLE.show_times();
+
     // Reading running settings
     settings set;
     DataReadWrite::readParameters("parameters.txt", set);
