@@ -24,50 +24,31 @@
 #include "g2o/types/slam2d/vertex_point_xy.h"
 #include "g2o/types/slam2d/g2o_types_slam2d_api.h"
 
+#include "vertex_one.h"
+#include "wifiLocalization.h"
+
 using namespace std;
 using namespace g2o;
 
 
 namespace g2o {
 
-    class G2O_TYPES_SLAM2D_API EdgeWall : public BaseMultiEdge<-1,VectorX>
+    class G2O_TYPES_SLAM2D_API EdgeWall : public BaseBinaryEdge<1, Vector1, VertexSE2, VertexSE2>
     {
-    protected:
-        unsigned int _kDimension;
-        double _sumOfMeasurements;
 
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
         EdgeWall();
 
-        void setDimension(int dimension_)
-        {
-
-            _dimension = dimension_;
-            _information.resize(1, 1);
-            _error.resize(1, 1);
-            _measurement.resize(dimension_, 1);
-        }
-
-        void setSize(int vertices)
-        {
-            resize(4);
-            _kDimension = vertices;
-            setDimension(1);
-        }
 
         virtual void computeError();
 
         virtual bool read(std::istream& is);
         virtual bool write(std::ostream& os) const;
 
-        virtual bool setMeasurementFromState();
+        virtual double initialEstimatePossible(const OptimizableGraph::VertexSet& fixed, OptimizableGraph::Vertex* toEstimate);
 
-        virtual void initialEstimate(const OptimizableGraph::VertexSet&, OptimizableGraph::Vertex*);
-        virtual double initialEstimatePossible(const OptimizableGraph::VertexSet&, OptimizableGraph::Vertex*);
-
-        //virtual void linearizeOplus();
-
+        std::vector< Wall > walls;
 
         struct Point
         {

@@ -67,10 +67,13 @@ void DataReadWrite::readParameters(std::string filename, settings &set) {
 }
 
 std::vector<LocationWiFi> DataReadWrite::readMap(const std::string &dirPath,
-                                                 double &mapImageScale) {
+                                                 double &mapImageScale,
+                                                 std::vector<LocationImage> &imageLocations) {
     std::cout << "[DataReadWrite::readMap] Reading map" << std::endl;
 
-    std::vector<LocationWiFi> mapLocations;
+    // Reading WiFi
+    std::vector<LocationWiFi> wifiLocations;
+    std::map<int, int> wifiId2Index;
 
     std::string filename = dirPath + "/wifi.map";
     std::ifstream wifiFile(filename.c_str());
@@ -78,6 +81,8 @@ std::vector<LocationWiFi> DataReadWrite::readMap(const std::string &dirPath,
         std::cout << "[DataReadWrite::readMap] Error! Could not open " << (dirPath + "/wifi.map").c_str() << " file"
                   << std::endl;
     }
+
+    int index = 0;
     while (!wifiFile.eof() && !wifiFile.fail()) {
         LocationWiFi curLoc;
 
@@ -85,6 +90,8 @@ std::vector<LocationWiFi> DataReadWrite::readMap(const std::string &dirPath,
         int locId = 0;
         int nscans = 0;
         wifiFile >> timestamp >> locId >> nscans;
+
+//        curLoc.locationXY.id = locId;
 
         curLoc.timestamp = timestamp;
         if (!wifiFile.fail()) {
@@ -101,17 +108,57 @@ std::vector<LocationWiFi> DataReadWrite::readMap(const std::string &dirPath,
                 }
                 std::getline(wifiFile, bssid, '\t');
                 std::getline(wifiFile, ssid, '\t');
-                wifiFile >> level >> freq >> localTimestamp;\
+                wifiFile >> level >> freq >> localTimestamp;
                 if (!wifiFile.fail()) {
                     curLoc.wifiScans.emplace_back(bssid, ssid, level, freq, localTimestamp);
                 }
             }
 
-            mapLocations.push_back(curLoc);
+            wifiLocations.push_back(curLoc);
+            wifiId2Index[locId] = index++;
         }
     }
-    std::cout << "[DataReadWrite::readMap] Read " << mapLocations.size() << " locations" << std::endl;
+    std::cout << "[DataReadWrite::readMap] Read " << wifiLocations.size() << " wifi locations" << std::endl;
 
+    // Reading images
+    imageLocations.clear();
+    std::map<int, int> imageId2Index;
+
+    filename = dirPath + "/imgs/images.map";
+    std::ifstream imageStream(filename.c_str());
+    if (!imageStream.is_open()) {
+        std::cout << "[DataReadWrite::readMap] Error! Could not open " << (dirPath + "/imgs/images.map").c_str() << " file"
+                  << std::endl;
+    }
+
+    index = 0;
+    while (!imageStream.eof() && !imageStream.fail()) {
+        LocationImage curLoc;
+
+        uint64_t timestamp = 0;
+        int locId = 0;
+        long int segmentId = 0;
+        std::string imageFile = "";
+        imageStream >> timestamp >> locId >> imageFile >> segmentId;
+
+        curLoc.timestamp = timestamp;
+        curLoc.segmentId = segmentId;
+        if (!imageStream.fail()) {
+//            std::cout << "Reading " << dirPath + "/imgs/" + imageFile << std::endl;
+           cv::Mat image = cv::imread(dirPath + "/imgs/" + imageFile);
+
+           if (!image.empty())
+           {
+               curLoc.image = image;
+           }
+
+            imageLocations.push_back(curLoc);
+            imageId2Index[locId] = index++;
+        }
+    }
+    std::cout << "[DataReadWrite::readMap] Read " << imageLocations.size() << " image locations" << std::endl;
+
+    // Reading positions
     std::ifstream positionsFile((dirPath + "/positions.map").c_str());
     if (!positionsFile.is_open()) {
         std::cout << "Error! Could not open " << (dirPath + "/positions.map").c_str() << " file" << std::endl;
@@ -121,8 +168,21 @@ std::vector<LocationWiFi> DataReadWrite::readMap(const std::string &dirPath,
         double x, y;
         positionsFile >> id >> x >> y;
         if (!positionsFile.fail()) {
-            if (id >= 0 && id < mapLocations.size()) {
-                mapLocations[id].locationXY = LocationXY(x, y, MAP_ID_INCREMENT + id);
+
+            // Is it a WiFi location?
+            auto it = wifiId2Index.find(id);
+            if (it != wifiId2Index.end()) {
+//                std::cout << "Compare WiFi indices: " << it->first << " " << it->second << std::endl;
+                int index = it->second;
+                wifiLocations[index].locationXY = LocationXY(x, y, MAP_ID_INCREMENT + it->first);
+            }
+
+            // Is it an image location?
+            auto it2 = imageId2Index.find(id);
+            if (it2 != imageId2Index.end()) {
+//                std::cout << "Compare image indices: " << it2->first << " " << it2->second << std::endl;
+                int index = it->second;
+                imageLocations[index].locationXY = LocationXY(x, y, MAP_ID_INCREMENT + it->first);
             }
         }
     }
@@ -137,7 +197,7 @@ std::vector<LocationWiFi> DataReadWrite::readMap(const std::string &dirPath,
 
     std::cout << "[DataReadWrite::readMap] Map successfully read" << std::endl;
 
-    return mapLocations;
+    return wifiLocations;
 }
 
 
@@ -204,6 +264,69 @@ std::vector<std::pair<uint64_t, double>> DataReadWrite::readOrient(const std::st
 
 
     return orientData;
+}
+
+std::vector<Wall> DataReadWrite::readWalls(const std::string &dirPath) {
+
+    std::cout << "[DataReadWrite::readWalls] Reading wall data" << std::endl;
+
+    std::ifstream wallFile((dirPath + "/walls.map").c_str());
+    if (!wallFile.is_open()) {
+        std::cout << "Error! Could not open " << dirPath + "/walls.map" <<
+                  std::endl;
+    }
+
+    std::vector< std::vector< uint64_t > > nodesNeighbours;
+    std::vector< std::pair<double, double> > nodes;
+
+    while (!wallFile.eof() & !wallFile.fail()) {
+
+        uint64_t numberOfNodes;
+        wallFile >> numberOfNodes;
+
+        if (!wallFile.fail()) {
+
+            // Number of nodes for the walls
+            for (int i=0;i<numberOfNodes;i++) {
+
+                // Metric position of a node
+                std::pair<double, double> position;
+                wallFile >> position.first >> position.second;
+                nodes.emplace_back(position);
+
+                // Neighbours
+                int numberOfNeighbours;
+                wallFile >> numberOfNeighbours;
+
+                std::vector< uint64_t > neighbours(numberOfNeighbours,0);
+                for (int j=0;j<numberOfNeighbours;j++) {
+                    wallFile >> neighbours[j];
+                }
+
+                nodesNeighbours.emplace_back(numberOfNeighbours);
+            }
+        }
+    }
+
+    std::cout << "[DataReadWrite::readOrient] Wall data successfully read - walls: " << nodes.size() << std::endl;
+
+    // Putting it in a format that is easier to process
+    std::vector<Wall> walls;
+    for (int i=0;i<nodes.size();i++) {
+
+        Wall wall;
+        wall.startX = nodes[i].first;
+        wall.startY = nodes[i].second;
+
+        for (int j=0;j<nodesNeighbours.size();j++) {
+            wall.endX = nodes[j].first;
+            wall.endY = nodes[j].second;
+        }
+
+        walls.push_back(wall);
+    }
+
+    return walls;
 }
 
 

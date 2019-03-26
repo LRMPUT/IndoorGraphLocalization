@@ -25,7 +25,6 @@
 #include "local_g2o/edge_wknn.h"
 #include "local_g2o/vertex_one.h"
 #include "local_g2o/edge_one_prior.h"
-#include "local_g2o/edge_wknn_deadzone.h"
 #include "local_g2o/edge_wall.h"
 
 

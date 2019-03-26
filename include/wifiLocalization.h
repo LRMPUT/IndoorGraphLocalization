@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <opencv2/core/core.hpp>
 #include "parameters.h"
 
 struct LocationXY {
@@ -55,6 +56,25 @@ public:
     std::vector<ScanResult> wifiScans;
 private:
 
+};
+
+class LocationImage {
+public:
+    LocationImage() {}
+
+    uint64_t timestamp;
+    LocationXY locationXY;
+    long int segmentId;
+    cv::Mat image;
+
+};
+
+class Wall {
+public:
+    Wall() {}
+
+    double startX, startY;
+    double endX, endY;
 };
 
 std::vector<std::pair<double, int>> wknnWeights(const std::vector<LocationWiFi> &database,

@@ -44,6 +44,7 @@ static constexpr double fftMagThresh = 0.2;
 #define EDGE_WKNN_INF_MAT_WEIGHT 10 // Weight assigned to the WiFi
 #define EDGE_PDR_INF_MAT_METRIC_WEIGHT 1 // Weight assigned to metric part of the PDR
 #define EDGE_PDR_INF_MAT_ORIENT_WEIGHT 15 // Weight assigned to orientation part of the PDR
+#define EDGE_WALL_PENALTY 50 // Penalty weight of EDGE_WALL
 
 // Running settings
 struct settings {

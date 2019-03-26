@@ -28,17 +28,24 @@
 #include <random>
 #include <vector>
 
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
 class DataReadWrite {
 public:
     static void readParameters(std::string filename, settings &set);
 
     static std::vector<LocationWiFi> readMap(const std::string &dirPath,
-                                             double &mapImageScale);
+                                             double &mapImageScale,
+                                             std::vector<LocationImage> &images);
 
 
     static std::vector<std::pair<uint64_t, double>> readAcc(const std::string &dirPath);
 
     static std::vector<std::pair<uint64_t, double>> readOrient(const std::string &dirPath);
+
+    static std::vector<Wall> readWalls(const std::string &dirPath);
 
     static void sparsifyMapPercent(std::vector<LocationWiFi> & wifiMap, double keepPercent);
 };

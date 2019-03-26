@@ -42,6 +42,8 @@
 #include "wifiLocalization.h"
 #include "stepometer.h"
 
+#include "fastable/FastABLE.h"
+
 #include <Eigen/Eigen>
 #include <algorithm>
 
@@ -49,7 +51,7 @@
 
 void computeAndAddEdgePDR(GraphManager &graphManager, vector<double> &accWindow, std::vector<std::pair<uint64_t, double>> &accData,
        unsigned int &accIndex, unsigned int &lastAccIndex, bool &isInitialized, std::vector<std::pair<uint64_t, double>> &orientData,
-       unsigned int &orientIndex, unsigned int &lastOrientIndex) {
+       unsigned int &orientIndex, unsigned int &lastOrientIndex, const std::vector<Wall> &wallMap) {
 
     double freqTime = Stepometer::computeDist(accWindow,
                                               (accData[accIndex].first - accData[lastAccIndex].first) *
@@ -68,31 +70,26 @@ void computeAndAddEdgePDR(GraphManager &graphManager, vector<double> &accWindow,
         // Let's add a PDR edge
         int idStep = graphManager.getIdofLastVertexStepNode();
         int lastVertexPoseId = graphManager.getIdOfLastVertexPose();
-        double orientDiff = -(orientData[orientIndex].second - orientData[lastOrientIndex].second);
-
-        // Normalizing theta
-        if (orientDiff < -M_PI)
-            orientDiff += 2*M_PI;
-        else if (orientDiff > M_PI)
-            orientDiff -= 2*M_PI;
+//        double orientDiff = -(orientData[orientIndex].second - orientData[lastOrientIndex].second);
+//
+//        // Normalizing theta
+//        if (orientDiff < -M_PI)
+//            orientDiff += 2*M_PI;
+//        else if (orientDiff > M_PI)
+//            orientDiff -= 2*M_PI;
 
         lastOrientIndex = orientIndex;
 
         // Do we intent on using orientation in the optimization
-        if (pdr_with_orientation_estimation)
-            graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, orientDiff, EDGE_PDR_INF_MAT_METRIC_WEIGHT, EDGE_PDR_INF_MAT_ORIENT_WEIGHT);
-        else
-            graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, 0, EDGE_PDR_INF_MAT_METRIC_WEIGHT, EDGE_PDR_INF_MAT_ORIENT_WEIGHT);
+//        if (pdr_with_orientation_estimation)
+//            graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, orientDiff, EDGE_PDR_INF_MAT_METRIC_WEIGHT, EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, EDGE_WALL_PENALTY);
+//        else
+            graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, 0, EDGE_PDR_INF_MAT_METRIC_WEIGHT, EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, EDGE_WALL_PENALTY);
     }
 
 }
 
 int main() {
-
-
-//    OpenABLE openABLE(argv[1]);
-//    openABLE.compute_OpenABLE();
-//    openABLE.show_times();
 
     // Reading running settings
     settings set;
@@ -103,7 +100,12 @@ int main() {
 
     // Reading initial WiFi map
     double mapImageScale;
-    std::vector<LocationWiFi> wifiMap = DataReadWrite::readMap("dataset/PUTMC_Floor3_Xperia_map", mapImageScale);
+//    std::vector<LocationWiFi> wifiMap = DataReadWrite::readMap("dataset/PUTMC_Floor3_Xperia_map", mapImageScale);
+    std::vector<LocationImage> imageMap;
+    std::vector<LocationWiFi> wifiMap = DataReadWrite::readMap("dataset/fastable_map", mapImageScale, imageMap);
+
+    // Reading information about walls
+    std::vector<Wall> wallMap = DataReadWrite::readWalls("dataset/fastable_map");
 
     // Determines what percent of the original WiFi map we plan on keeping
     DataReadWrite::sparsifyMapPercent(wifiMap, set.mapKeepPercent);
@@ -111,19 +113,28 @@ int main() {
     // Adding WiFi map to graph as fixed
     graphManager.addVerticesForInitialWiFiMap(wifiMap);
 
+    // Initialize FastABLE
+    static double patchSize = 64, compareLength = 30;
+    FastABLE fastable(patchSize, compareLength);
+
+    // Add map to FastABLE
+    fastable.addImageMap(imageMap);
+
+
     // Test trajectories
-    std::vector<std::string> testTrajs{"dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj1", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj2",
-                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj3", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj4",
-                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj5", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj6_JW",
-                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj7_JW", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj8_JW",
-                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj9_JW", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj10_JW",
-                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj11", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj12",
-                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj13", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj14",
-                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj15", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj16",
-                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj17", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj18",
-                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj19", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj20",
-                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj21", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj22",
-                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj23", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj24"};
+//    std::vector<std::string> testTrajs{"dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj1", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj2",
+//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj3", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj4",
+//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj5", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj6_JW",
+//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj7_JW", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj8_JW",
+//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj9_JW", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj10_JW",
+//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj11", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj12",
+//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj13", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj14",
+//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj15", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj16",
+//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj17", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj18",
+//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj19", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj20",
+//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj21", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj22",
+//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj23", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj24"};
+    std::vector<std::string> testTrajs{"dataset/fastable_test"};
 
     // Processing each trajectory
     std::vector<int> poseCounter(testTrajs.size(), 0), wifiCounter(testTrajs.size(), 0);
@@ -144,10 +155,11 @@ int main() {
         // Reading data from accelerometer, orientation estimation and WiFi adapter
         std::vector<std::pair<uint64_t, double>> accData = DataReadWrite::readAcc(testTrajs[trajIndex]);
         std::vector<std::pair<uint64_t, double>> orientData = DataReadWrite::readOrient(testTrajs[trajIndex]);
-        std::vector<LocationWiFi> testLocation = DataReadWrite::readMap(testTrajs[trajIndex], mapImageScale);
+        std::vector<LocationImage> testImage;
+        std::vector<LocationWiFi> testLocation = DataReadWrite::readMap(testTrajs[trajIndex], mapImageScale, testImage);
 
         // Indices of samples to be read
-        unsigned int accIndex = 0, wifiIndex = 0, orientIndex = 0, lastOrientIndex = 0, lastAccIndex = 0;
+        unsigned int accIndex = 0, wifiIndex = 0, orientIndex = 0, lastOrientIndex = 0, lastAccIndex = 0, imageIndex = 0;
 
         // Accumulated measurements for stepometer
         vector<double> accWindow;
@@ -174,9 +186,13 @@ int main() {
             if (orientIndex < orientData.size())
                 orientTimestamp = orientData[orientIndex].first;
 
+            uint64_t imageTimestamp = std::numeric_limits<uint64_t>::max();
+            if (imageIndex < testImage.size())
+                imageTimestamp = testImage[imageIndex].timestamp;
+
 
             // Finding the lowest timestamp to process
-            std::vector<uint64_t> timestamps = {wifiTimestamp, accTimestamp, orientTimestamp};
+            std::vector<uint64_t> timestamps = {wifiTimestamp, accTimestamp, orientTimestamp, imageTimestamp};
             std::sort(timestamps.begin(), timestamps.end());
 
             // We processed everything (not needed as WiFi should break earlier)
@@ -185,6 +201,7 @@ int main() {
 
             // Process accelerometer
             if (timestamps[0] == accTimestamp) {
+//                std::cout << "Acc : " << accTimestamp << std::endl;
 
                 // Something went wrong and over 1 second difference in the original data
                 if (accIndex > 0 && (accTimestamp - accData[accIndex-1].first) > 1e9) {
@@ -200,11 +217,12 @@ int main() {
                 if (accWindow.size() >= winLen) {
                     poseNum++;
                     computeAndAddEdgePDR(graphManager, accWindow, accData, accIndex, lastAccIndex, isInitialized,
-                                         orientData, orientIndex, lastOrientIndex);
+                                         orientData, orientIndex, lastOrientIndex, wallMap);
                 }
             }
             // Process orientation
             else if (timestamps[0] == orientTimestamp) {
+//                std::cout << "Ori : " << orientTimestamp << std::endl;
 
                 // Something went wrong and over 1 second difference
                 if (orientIndex > 0 && orientTimestamp - orientData[orientIndex-1].first > 1e9)
@@ -215,7 +233,7 @@ int main() {
                     double orientDiff = (orientData[orientIndex].second - orientData[lastOrientIndex].second);
                     if (fabs(orientDiff) > significant_orientation_change_threshold) {
                         computeAndAddEdgePDR(graphManager, accWindow, accData, accIndex, lastAccIndex, isInitialized,
-                                             orientData, orientIndex, lastOrientIndex);
+                                             orientData, orientIndex, lastOrientIndex, wallMap);
                     }
                 }
 
@@ -223,6 +241,8 @@ int main() {
             }
             // Process wifi
             else if (timestamps[0] == wifiTimestamp){
+//                std::cout << "WiFi: " << wifiTimestamp << std::endl;
+
                 // Localizing with WiFi
                 std::vector<std::pair<double, int>> edgeWknnWeights = wknnWeights(wifiMap, testLocation[wifiIndex],
                                                                                   WKNN_N);
@@ -244,7 +264,7 @@ int main() {
                     else if (accWindow.size() >= 0) {
                         poseNum++;
                         computeAndAddEdgePDR(graphManager, accWindow, accData, accIndex, lastAccIndex, isInitialized,
-                                             orientData, orientIndex, lastOrientIndex);
+                                             orientData, orientIndex, lastOrientIndex, wallMap);
                     }
 
                     // Adding WiFi measurement. WiFi with deadzone is not used
@@ -264,6 +284,14 @@ int main() {
                 // Optimize as new information is available
                 if (online_optimization)
                     graphManager.optimize(250);
+            }
+            else if (timestamps[0] == imageTimestamp) {
+//                std::cout << "Img : " << imageTimestamp << std::endl;
+
+                // TODO: Processing image
+                fastable.addNewTestingImage(testImage[imageIndex].image);
+
+                imageIndex++;
             }
         }
 

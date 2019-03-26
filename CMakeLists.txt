@@ -66,15 +66,13 @@ add_executable(graph_localization
         src/local_g2o/edge_pdr.cpp
         src/local_g2o/edge_stepometer.cpp
         src/local_g2o/edge_wknn.cpp
-        src/local_g2o/edge_wknn_deadzone.cpp
         src/local_g2o/edge_wall.cpp
         src/local_g2o/register_types.cpp
         src/wifiLocalization.cpp
         src/stepometer.cpp
         src/DataReadWrite/dataReadWrite.cpp
         src/graphManager.cpp
-        src/fastable/OpenABLE.cpp
-        src/fastable/dbscan.cpp
+        src/fastable/FastABLE.cpp
         src/ldb/ldb.cpp
         src/source.cpp)
 
@@ -112,16 +110,3 @@ target_link_libraries(graph_localization
         ${PROJECT_SOURCE_DIR}/EXTERNAL/g2o/lib/libg2o_solver_csparse.so
         ${PROJECT_SOURCE_DIR}/EXTERNAL/g2o/lib/libg2o_types_slam3d.so
         ${PROJECT_SOURCE_DIR}/EXTERNAL/g2o/lib/libg2o_solver_dense.so)
-
-
-# Build
-add_executable(fastable_threshold
-        src/fastable/OpenABLE.cpp
-        src/fastable/dbscan.cpp
-        src/ldb/ldb.cpp
-        src/fastable_train.cpp)
-
-target_link_libraries(fastable_threshold
-        ${OpenCV_LIBS}
-        ${Boost_LIBRARIES})
-

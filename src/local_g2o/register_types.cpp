@@ -18,7 +18,6 @@ namespace g2o {
     G2O_REGISTER_TYPE(EDGE_WKNN, EdgeWKNN);
     G2O_REGISTER_TYPE(EDGE_PRIOR_ONE, EdgeOnePrior);
 
-    G2O_REGISTER_TYPE(EDGE_WKNN_DEADZONE, EdgeWKNNDeadzone);
     G2O_REGISTER_TYPE(EDGE_WALL, EdgeWall);
 
 } // end namespace

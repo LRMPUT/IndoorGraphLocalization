@@ -179,7 +179,8 @@ void GraphManager::addEdgeWKNN(const int &id, const std::vector<std::pair<double
     }
 }
 
-void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTime, double dangle, double weightXY, double weightTheta) {
+void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTime, double dangle, double weightXY, double weightTheta,
+        std::vector<Wall> walls, double wallPenalty) {
 
     const g2o::VertexSE2 *vPre = dynamic_cast<const VertexSE2 *>(optimizer.vertex(idPre));
     const g2o::VertexOne *vStep = dynamic_cast<const VertexOne *>(optimizer.vertex(idStep));
@@ -190,6 +191,7 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
         double averageAngle = vPre->estimate()[2] + dangle / 2.0;
 
         // Guess of the next pose
+        // TODO: We should make sure that no wall edge is violated due to local minimums of optimization
         double x = vPre->estimate()[0] + estimatedStepLength * freqTime * cos (averageAngle);
         double y = vPre->estimate()[1] + estimatedStepLength * freqTime * sin (averageAngle);
         double theta = normalize_theta(vPre->estimate()[2] + dangle);
@@ -213,6 +215,10 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
         informationMatrix(0,0) = weightXY;
         informationMatrix(1,1) = weightXY;
         informationMatrix(2,2) = weightTheta;
+        e->setInformation(informationMatrix);
+
+        // Adding the edge
+        optimizer.addEdge(e);
 
         // TODO: EXPERIMENTAL
 //        Eigen::Matrix3d covarianceDist;
@@ -234,14 +240,29 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
 //        std::cout << "\tcovariance: " << std::endl << covariance << std::endl;
 //
 //        std::cout << "\tinformationMatrix: " << std::endl << informationMatrix << std::endl;
+//        e->setInformation(informationMatrix);
 
+        // Creating Wall edge
+        g2o::EdgeWall *eWall = new g2o::EdgeWall();
+        eWall->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex(idPre)));
+        eWall->setVertex(1, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex(idPost)));
 
-        e->setInformation(informationMatrix);
+        // Setting the wall information
+        eWall->walls = walls;
+
+        // Measurement
+        Eigen::Matrix<double, 1, 1> obsWall;
+        obsWall << wallPenalty;
+        eWall->setMeasurement(obsWall);
+
+        // Information matrix
+        Eigen::Matrix<double, 1, 1> infMatrixWall = Eigen::Matrix<double, 1, 1>::Identity();
+        eWall->setInformation(infMatrixWall);
 
         // Adding the edge
-        optimizer.addEdge(e);
+        optimizer.addEdge(eWall);
 
-        std::cout << "[GraphManager::addEdgePDR] Successful added EdgePDR" << std::endl;
+        std::cout << "[GraphManager::addEdgePDR] Successful added EdgePDR with optional walls" << std::endl;
     }
 }
 

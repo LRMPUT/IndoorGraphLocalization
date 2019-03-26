@@ -45,6 +45,7 @@
 #include "local_g2o/edge_pdr.h"
 #include "local_g2o/edge_stepometer.h"
 #include "local_g2o/edge_wknn.h"
+#include "local_g2o/edge_wall.h"
 #include "local_g2o/vertex_one.h"
 #include "local_g2o/edge_one_prior.h"
 
@@ -83,7 +84,9 @@ public:
     void addEdgeWKNN(const int &id, const std::vector<std::pair<double, int>> &wknnWeights, double infMatrixWeight);
 
     // Adds the PDR edge from selected pose (idPre) with step length node (idStep) and measurement (freqTime, dangle)
-    void addEdgePDR(const int &idPre, const int &idStep, double freqTime, double dangle, double weightXY, double weightTheta);
+    // Optionally it is possible to provide information about the walls with the wall penalty for wall crossing
+    void addEdgePDR(const int &idPre, const int &idStep, double freqTime, double dangle, double weightXY, double weightTheta,
+                    std::vector<Wall> walls, double wallPenalty);
 
     // Methods to manage ids
     int getIdOfLastVertexPose();
