@@ -37,6 +37,10 @@ static constexpr double freqMin = 1.3;
 static constexpr double freqMax = 2.2;
 static constexpr double fftMagThresh = 0.2;
 
+// FASTABLE
+static constexpr double patchSize = 64;
+static constexpr int compareLength = 50;
+static constexpr double safetyThresholdRatio = 0.7;
 
 // Graph edges
 #define EDGE_PRIOR_VAL 0.65 // Assumed prior step length - 0.65 meters
@@ -44,7 +48,7 @@ static constexpr double fftMagThresh = 0.2;
 #define EDGE_WKNN_INF_MAT_WEIGHT 10 // Weight assigned to the WiFi
 #define EDGE_PDR_INF_MAT_METRIC_WEIGHT 1 // Weight assigned to metric part of the PDR
 #define EDGE_PDR_INF_MAT_ORIENT_WEIGHT 15 // Weight assigned to orientation part of the PDR
-#define EDGE_WALL_PENALTY 50 // Penalty weight of EDGE_WALL
+#define EDGE_WALL_PENALTY 0 // Penalty weight of EDGE_WALL
 
 // Running settings
 struct settings {
@@ -62,6 +66,6 @@ static constexpr double significant_orientation_change_threshold = 45.0 * 3.1415
 static constexpr bool assume_initial_pose_from_wknn = false;
 static constexpr bool cholmod_true_pcg_false = true;
 
-static constexpr bool verbose = true;
+static constexpr bool verbose = false;
 
 #endif //INDOORGRAPHLOCALIZATION_PARAMETERS_H

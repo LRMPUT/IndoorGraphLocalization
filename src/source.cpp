@@ -102,7 +102,7 @@ int main() {
     double mapImageScale;
 //    std::vector<LocationWiFi> wifiMap = DataReadWrite::readMap("dataset/PUTMC_Floor3_Xperia_map", mapImageScale);
     std::vector<LocationImage> imageMap;
-    std::vector<LocationWiFi> wifiMap = DataReadWrite::readMap("dataset/fastable_map", mapImageScale, imageMap);
+    std::vector<LocationWiFi> wifiMap = DataReadWrite::readMap("dataset/2019_04_02_PUTMC_Floor3_Experia", mapImageScale, imageMap);
 
     // Reading information about walls
     std::vector<Wall> wallMap = DataReadWrite::readWalls("dataset/fastable_map");
@@ -114,12 +114,13 @@ int main() {
     graphManager.addVerticesForInitialWiFiMap(wifiMap);
 
     // Initialize FastABLE
-    static double patchSize = 64, compareLength = 30;
     FastABLE fastable(patchSize, compareLength);
 
     // Add map to FastABLE
     fastable.addImageMap(imageMap);
 
+    int a;
+    std::cin >> a;
 
     // Test trajectories
 //    std::vector<std::string> testTrajs{"dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj1", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj2",
