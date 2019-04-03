@@ -14,25 +14,33 @@ void FastABLE::addImageMap(const std::vector<LocationImage> &imageMap) {
 
     // Divide into map segments
     std::vector<cv::Mat> imageSegment;
+    std::vector<LocationXY> imageSegmentLocations;
     for (int i = 0; i < imageMap.size(); i++) {
 
         // Different segment
         if (!imageSegment.empty() && imageMap[i - 1].segmentId != imageMap[i].segmentId) {
 
             // Only adding if segment is larger than compareLength
-            if (imageSegment.size() > compareLength)
+            if (imageSegment.size() > compareLength) {
                 mapImageSegments.push_back(imageSegment);
+                mapImageSegmentLocations.push_back(imageSegmentLocations);
+            }
             imageSegment.clear();
+            imageSegmentLocations.clear();
         }
 
         imageSegment.push_back(global_description(imageMap[i].image));
+        imageSegmentLocations.push_back(imageMap[i].locationXY);
 
+//        std::cout << "?? " << imageMap[i].locationXY.x << " " << imageMap[i].locationXY.y << " " << imageMap[i].locationXY.id << std::endl;
     }
 
 
     // Only adding if segment is larger than compareLength
-    if (imageSegment.size() > compareLength)
+    if (imageSegment.size() > compareLength) {
         mapImageSegments.push_back(imageSegment);
+        mapImageSegmentLocations.push_back(imageSegmentLocations);
+    }
 
     imageCounter = 0;
     previousDistances = std::vector<std::vector<unsigned long long> >{mapImageSegments.size(), std::vector<unsigned long long>()};
@@ -45,7 +53,7 @@ void FastABLE::addImageMap(const std::vector<LocationImage> &imageMap) {
 }
 
 
-void FastABLE::addNewTestingImage(cv::Mat image) {
+int FastABLE::addNewTestingImage(cv::Mat image) {
 
     // Computing descriptor
     cv::Mat imgDesc = global_description(image);
@@ -60,11 +68,13 @@ void FastABLE::addNewTestingImage(cv::Mat image) {
     }
 
     // TODO Recognition
+    int correctCount = 0;
     if (imgDescWindow.size() == compareLength) {
-        performRecognition(imgDescWindow, lastImageNotInWindow);
+        correctCount = performRecognition(imgDescWindow, lastImageNotInWindow);
     }
 
     imageCounter++;
+    return correctCount;
 }
 
 
@@ -221,14 +231,16 @@ std::vector<std::vector<unsigned long long>> FastABLE::matchWindowToSequences(co
 
 
 
-void FastABLE::performRecognition(const std::vector<cv::Mat> &testDescriptorsWindow, const cv::Mat onePriorToWindow) {
-    std::cout << "FastABLE::performRecognition - start" << std::endl;
+int FastABLE::performRecognition(const std::vector<cv::Mat> &testDescriptorsWindow, const cv::Mat onePriorToWindow) {
+//    std::cout << "FastABLE::performRecognition - start" << std::endl;
 
     // Match current window
     std::vector<std::vector<unsigned long long>> resultsForAll = matchWindowToSequences( this->mapImageSegments,
             testDescriptorsWindow, onePriorToWindow, this->previousDistances);
 
-    std::cout << "FastABLE::performRecognition - after recognition" << std::endl;
+//    std::cout << "FastABLE::performRecognition - after recognition" << std::endl;
+
+    int correctCount = 0;
 
     // Go through results
     for (int i=0;i<this->mapImageSegments.size();i++) {
@@ -243,13 +255,17 @@ void FastABLE::performRecognition(const std::vector<cv::Mat> &testDescriptorsWin
             // Correct recognition
             if (resultForSegment[j] < segmentThreshold ){
 
-                std::cout << "Correct recognition! " << resultForSegment[j] << " < " << segmentThreshold << std::endl;
+                std::cout << "Correct recognition! " << resultForSegment[j] << " < " << segmentThreshold << " | ";
+                std::cout << "Location: " << mapImageSegmentLocations[i][j].x << " " << mapImageSegmentLocations[i][j].y << std::endl;
+
                 // TODO: Now determine location
+                correctCount++;
             }
         }
     }
 
-    std::cout << "FastABLE::performRecognition - end" << std::endl;
+//    std::cout << "FastABLE::performRecognition - end" << std::endl;
+    return correctCount;
 }
 
 

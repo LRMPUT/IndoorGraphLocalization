@@ -102,10 +102,10 @@ int main() {
     double mapImageScale;
 //    std::vector<LocationWiFi> wifiMap = DataReadWrite::readMap("dataset/PUTMC_Floor3_Xperia_map", mapImageScale);
     std::vector<LocationImage> imageMap;
-    std::vector<LocationWiFi> wifiMap = DataReadWrite::readMap("dataset/2019_04_02_PUTMC_Floor3_Experia", mapImageScale, imageMap);
+    std::vector<LocationWiFi> wifiMap = DataReadWrite::readMap("dataset/2019_04_02_PUTMC_Floor3_Experia_map", mapImageScale, imageMap);
 
     // Reading information about walls
-    std::vector<Wall> wallMap = DataReadWrite::readWalls("dataset/fastable_map");
+    std::vector<Wall> wallMap = DataReadWrite::readWalls("dataset/2019_04_02_PUTMC_Floor3_Experia_map");
 
     // Determines what percent of the original WiFi map we plan on keeping
     DataReadWrite::sparsifyMapPercent(wifiMap, set.mapKeepPercent);
@@ -119,23 +119,21 @@ int main() {
     // Add map to FastABLE
     fastable.addImageMap(imageMap);
 
-    int a;
-    std::cin >> a;
+//    int a;
+//    std::cin >> a;
 
     // Test trajectories
-//    std::vector<std::string> testTrajs{"dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj1", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj2",
-//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj3", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj4",
-//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj5", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj6_JW",
-//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj7_JW", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj8_JW",
-//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj9_JW", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj10_JW",
-//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj11", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj12",
-//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj13", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj14",
-//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj15", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj16",
-//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj17", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj18",
-//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj19", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj20",
-//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj21", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj22",
-//                                       "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj23", "dataset/PUTMC_Floor3_Xperia_trajs/xperia_traj24"};
-    std::vector<std::string> testTrajs{"dataset/fastable_test"};
+//    std::vector<std::string> testTrajs{"dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_2",
+//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_3", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_4",
+//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_2",
+//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_3", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_4",
+//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_5", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_1",
+//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_2", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_3",
+//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_2",
+//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_3"};
+    std::vector<std::string> testTrajs{"dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_2",
+                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_3", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_4",
+                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_5"};
 
     // Processing each trajectory
     std::vector<int> poseCounter(testTrajs.size(), 0), wifiCounter(testTrajs.size(), 0);
@@ -290,7 +288,12 @@ int main() {
 //                std::cout << "Img : " << imageTimestamp << std::endl;
 
                 // TODO: Processing image
-                fastable.addNewTestingImage(testImage[imageIndex].image);
+                int correctCount = fastable.addNewTestingImage(testImage[imageIndex].image);
+
+                if (correctCount > 0) {
+                    std::cout << "trajIndex = " << trajIndex << "  vertexId = " << graphManager.getIdOfLastVertexPose()
+                              << "  correctCount = " << correctCount << std::endl;
+                }
 
                 imageIndex++;
             }

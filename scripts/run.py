@@ -49,9 +49,9 @@ parameterFileName = "parameters.txt";
 #mapKeepPercent = [0.5, 0.5, 0.6, 0.6, 0.7, 0.7, 0.8, 0.8, 0.9, 0.9, 1.0, 1.0];
 #stepLengthEstimation = ["true", "true", "true", "true", "true", "true", "true", "true", "true", "true", "true", "true"];
 runsPerSequence = 1;
-interUserConnections = ["true", "true", "false", "false"];
-stepLengthEstimation = ["true", "false", "true", "false"];
-mapKeepPercent = [1.0, 1.0, 1.0, 1.0];
+interUserConnections = ["false"];
+stepLengthEstimation = ["false"];
+mapKeepPercent = [1.0];
 
 # For chosen parameters
 for (iUC, mKP, sLE) in zip(interUserConnections, mapKeepPercent, stepLengthEstimation):

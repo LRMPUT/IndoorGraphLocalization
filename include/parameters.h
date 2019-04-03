@@ -40,7 +40,7 @@ static constexpr double fftMagThresh = 0.2;
 // FASTABLE
 static constexpr double patchSize = 64;
 static constexpr int compareLength = 50;
-static constexpr double safetyThresholdRatio = 0.7;
+static constexpr double safetyThresholdRatio = 0.9;
 
 // Graph edges
 #define EDGE_PRIOR_VAL 0.65 // Assumed prior step length - 0.65 meters

@@ -181,8 +181,8 @@ std::vector<LocationWiFi> DataReadWrite::readMap(const std::string &dirPath,
             auto it2 = imageId2Index.find(id);
             if (it2 != imageId2Index.end()) {
 //                std::cout << "Compare image indices: " << it2->first << " " << it2->second << std::endl;
-                int index = it->second;
-                imageLocations[index].locationXY = LocationXY(x, y, MAP_ID_INCREMENT + it->first);
+                int index = it2->second;
+                imageLocations[index].locationXY = LocationXY(x, y, MAP_ID_INCREMENT + it2->first);
             }
         }
     }

@@ -39,7 +39,7 @@ public:
      * Adds new image for recognition
      * @param image
      */
-    void addNewTestingImage(cv::Mat image);
+    int addNewTestingImage(cv::Mat image);
 
 
 private:
@@ -86,7 +86,7 @@ private:
                                                                         std::vector<std::vector<unsigned long long> > &previousDistances);
 
 
-    void performRecognition(const std::vector<cv::Mat> &testDescriptorsWindow, const cv::Mat onePriorToWindow);
+    int performRecognition(const std::vector<cv::Mat> &testDescriptorsWindow, const cv::Mat onePriorToWindow);
 
     /**
      *
@@ -110,6 +110,7 @@ private:
 
     // Map stored as a series of segments of patches
     std::vector<std::vector<cv::Mat>> mapImageSegments;
+    std::vector<std::vector<LocationXY>> mapImageSegmentLocations;
 
     // Corresponding thresholds for segments
     std::vector<unsigned long long> mapImageSegThresholds;
