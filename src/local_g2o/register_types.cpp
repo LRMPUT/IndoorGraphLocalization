@@ -19,5 +19,6 @@ namespace g2o {
     G2O_REGISTER_TYPE(EDGE_PRIOR_ONE, EdgeOnePrior);
 
     G2O_REGISTER_TYPE(EDGE_WALL, EdgeWall);
+    G2O_REGISTER_TYPE(EDGE_VPR, EdgeVPR);
 
 } // end namespace

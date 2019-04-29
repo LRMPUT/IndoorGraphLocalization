@@ -23,7 +23,7 @@
 #include "parameters.h"
 
 struct LocationXY {
-    LocationXY() {}
+    LocationXY() { x = 0; y = 0; id = -1;}
 
     LocationXY(double ix, double iy, int id) : x(ix), y(iy), id(id) {}
 

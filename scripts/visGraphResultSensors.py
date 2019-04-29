@@ -30,6 +30,7 @@ def readPositions(dirName, fileName):
     positions = [];
     pdrEdges = [];
     wknnEdges = [];
+    vprEdges = [];
 
     with open(dirName + "/" + fileName , 'r') as f: 
         for line in f:
@@ -53,8 +54,13 @@ def readPositions(dirName, fileName):
                 id4 = int(lineSplitted[4]);
                 id5 = int(lineSplitted[5]);
                 wknnEdges.append([id1,id2,id3,id4,id5]);
+            elif lineSplitted[0] == "EDGE_VPR":
+                id1 = int(lineSplitted[1]);
+                X = float(lineSplitted[2]);
+                Y = float(lineSplitted[3]);
+                vprEdges.append([id1,X,Y]);
        
-    return scale, positions, pdrEdges, wknnEdges
+    return scale, positions, pdrEdges, wknnEdges, vprEdges
 
 
 
@@ -146,7 +152,7 @@ def drawGT(dirName, metaGtPositions, metaGtLists, scale, outputFileName):
     print("TrajALL: Length: %.2f" % (totalLen))
     image.save(outputFileName, "png")
 
-def drawNodes(trajId, dirName, positions, pdrEdges, wknnEdges, metaGtPositions, metaGtLists, scale, outputFileName, outputFileName2):
+def drawNodes(trajId, dirName, positions, pdrEdges, wknnEdges, vprEdges, metaGtPositions, metaGtLists, scale, outputFileName, outputFileName2):
         
     image = Image.open("dataset/map.png").convert('RGB')
     basewidth = 3049
@@ -252,8 +258,32 @@ def drawNodes(trajId, dirName, positions, pdrEdges, wknnEdges, metaGtPositions, 
             else:
                 total = total + 1;
 
-
     print "TrajID: " + str(trajId) + "\tinterUser: " + str(interUser) + " out of " + str(total) 
+
+    for edge in vprEdges:
+        idPos = edge[0];
+        curTrajId = int(idPos / 1000);
+
+        vprX = edge[1];
+        vprY = edge[2];
+        
+        vprX = vprX * wpercent * scale;
+        vprY = vprY * wpercent * scale;
+
+        if trajId == curTrajId or trajId == -1:
+            xPos, yPos, thetaPos = findXYTheta(positions, idPos);
+            xPos = xPos * wpercent * scale;
+            yPos = yPos * wpercent * scale;
+         
+            
+
+            draw.line((xPos, yPos, vprX, vprY), fill='green', width=5)
+            
+            circleSize = 10;
+            draw.ellipse((vprX - circleSize, vprY - circleSize, vprX + circleSize, vprY + circleSize), fill='green',
+                                 outline='black')
+        
+
 
     image.save(outputFileName, "png")
 
@@ -395,7 +425,7 @@ if len(sys.argv) == 1:
 
 
     firstMap = ".";
-    scale, positions, pdrEdges, wknnEdges = readPositions('.', 'output.g2o')
+    scale, positions, pdrEdges, wknnEdges, vprEdges = readPositions('.', 'output.g2o')
 
     # Reading and drawing ground truth
     gtPositions, gtList = readGroundTruth('dataset/')
@@ -404,8 +434,8 @@ if len(sys.argv) == 1:
 
 
     for trajId in range(0,len(gtPositions)):
-        drawNodes(trajId, firstMap, positions, pdrEdges, wknnEdges, gtPositions, gtList, scale, firstMap + "/traj_" + str(trajId+1) + ".png", "");
-    drawNodes(-1, firstMap, positions, pdrEdges, wknnEdges, gtPositions, gtList, scale,
+        drawNodes(trajId, firstMap, positions, pdrEdges, wknnEdges, vprEdges, gtPositions, gtList, scale, firstMap + "/traj_" + str(trajId+1) + ".png", "");
+    drawNodes(-1, firstMap, positions, pdrEdges, wknnEdges, vprEdges, gtPositions, gtList, scale,
               firstMap + "/traj_all.png", firstMap + "/wifi.png");
 
     print "-----------"

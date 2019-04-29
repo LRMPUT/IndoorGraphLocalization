@@ -46,6 +46,7 @@
 #include "local_g2o/edge_stepometer.h"
 #include "local_g2o/edge_wknn.h"
 #include "local_g2o/edge_wall.h"
+#include "local_g2o/edge_vpr.h"
 #include "local_g2o/vertex_one.h"
 #include "local_g2o/edge_one_prior.h"
 
@@ -87,6 +88,8 @@ public:
     // Optionally it is possible to provide information about the walls with the wall penalty for wall crossing
     void addEdgePDR(const int &idPre, const int &idStep, double freqTime, double dangle, double weightXY, double weightTheta,
                     std::vector<Wall> walls, double wallPenalty);
+
+    void addEdgeVPR(const int &id, LocationXY imageRecognizedLocation, double weightXY);
 
     // Methods to manage ids
     int getIdOfLastVertexPose();

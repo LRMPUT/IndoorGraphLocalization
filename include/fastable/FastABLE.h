@@ -13,10 +13,13 @@
 #include <algorithm>
 
 
-//struct ImageRecognitionResult {
-//
-//    std::vector<unsigned long long> matchingResult;
-//};
+struct ImageRecognitionResult {
+
+    int correctRecognitions;
+    std::vector<double> matchingWeights;
+    std::vector<LocationXY> matchingLocations;
+};
+
 
 class FastABLE {
 
@@ -39,7 +42,7 @@ public:
      * Adds new image for recognition
      * @param image
      */
-    int addNewTestingImage(cv::Mat image);
+    LocationXY addNewTestingImage(cv::Mat image);
 
 
 private:
@@ -86,7 +89,7 @@ private:
                                                                         std::vector<std::vector<unsigned long long> > &previousDistances);
 
 
-    int performRecognition(const std::vector<cv::Mat> &testDescriptorsWindow, const cv::Mat onePriorToWindow);
+    ImageRecognitionResult performRecognition(const std::vector<cv::Mat> &testDescriptorsWindow, const cv::Mat onePriorToWindow);
 
     /**
      *
@@ -103,6 +106,10 @@ private:
      */
     unsigned long long determineMinimalHammingDistance(const std::vector<std::vector<cv::Mat> > &trainingDescriptors,
                                                                  const std::vector<cv::Mat> &testDescriptors);
+
+
+    LocationXY bestLocationGuess(ImageRecognitionResult imageRecognitionResult);
+
 
     // Parameters
     double patchSize;

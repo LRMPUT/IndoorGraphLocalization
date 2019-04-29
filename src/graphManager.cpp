@@ -266,6 +266,33 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
     }
 }
 
+void GraphManager::addEdgeVPR(const int &id, LocationXY imageRecognizedLocation, double weightXY) {
+
+    const g2o::VertexSE2 *vertex = dynamic_cast<const VertexSE2 *>(optimizer.vertex(id));
+    if (vertex && imageRecognizedLocation.id >= 0) {
+
+        // Creating VPR edge
+        g2o::EdgeVPR *e = new g2o::EdgeVPR();
+        e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex(id)));
+
+        // Measurement
+        Eigen::Matrix<double, 2, 1> obs2;
+        obs2 << imageRecognizedLocation.x, imageRecognizedLocation.y;
+        e->setMeasurement(obs2);
+
+        // Information matrix
+        Eigen::Matrix2d informationMatrix = Eigen::Matrix2d::Identity();
+        informationMatrix(0,0) = weightXY;
+        informationMatrix(1,1) = weightXY;
+        e->setInformation(informationMatrix);
+
+        // Adding the edge
+        optimizer.addEdge(e);
+
+        std::cout << "[GraphManager::addEdgePDR] Successful added EdgeVPR" << std::endl;
+    }
+}
+
 // Methods to manage ids
 int GraphManager::getIdOfLastVertexPose() {
     if (nextPoseId == 0)

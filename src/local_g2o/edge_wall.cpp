@@ -46,7 +46,7 @@ namespace g2o{
     }
 
     bool EdgeWall::write(std::ostream& os) const{
-        os << measurement()[0] << " " << information()(0,0) << std::endl;
+        os << measurement()[0] << " " << information()(0,0);
 
         return os.good();
     }

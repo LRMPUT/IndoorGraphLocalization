@@ -49,6 +49,7 @@ static constexpr double safetyThresholdRatio = 0.9;
 #define EDGE_PDR_INF_MAT_METRIC_WEIGHT 1 // Weight assigned to metric part of the PDR
 #define EDGE_PDR_INF_MAT_ORIENT_WEIGHT 15 // Weight assigned to orientation part of the PDR
 #define EDGE_WALL_PENALTY 0 // Penalty weight of EDGE_WALL
+#define EDGE_VPR_INF_MAT_WEIGHT 1 // Penalty weight of EDGE_VPR
 
 // Running settings
 struct settings {

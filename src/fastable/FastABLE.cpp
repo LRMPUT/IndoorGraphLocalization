@@ -53,7 +53,7 @@ void FastABLE::addImageMap(const std::vector<LocationImage> &imageMap) {
 }
 
 
-int FastABLE::addNewTestingImage(cv::Mat image) {
+LocationXY FastABLE::addNewTestingImage(cv::Mat image) {
 
     // Computing descriptor
     cv::Mat imgDesc = global_description(image);
@@ -68,13 +68,15 @@ int FastABLE::addNewTestingImage(cv::Mat image) {
     }
 
     // TODO Recognition
-    int correctCount = 0;
+    ImageRecognitionResult imageRecognitionResult;
     if (imgDescWindow.size() == compareLength) {
-        correctCount = performRecognition(imgDescWindow, lastImageNotInWindow);
+        imageRecognitionResult = performRecognition(imgDescWindow, lastImageNotInWindow);
+
+        LocationXY bestGuess = bestLocationGuess(imageRecognitionResult);
+        return bestGuess;
     }
 
-    imageCounter++;
-    return correctCount;
+    return LocationXY();
 }
 
 
@@ -231,7 +233,7 @@ std::vector<std::vector<unsigned long long>> FastABLE::matchWindowToSequences(co
 
 
 
-int FastABLE::performRecognition(const std::vector<cv::Mat> &testDescriptorsWindow, const cv::Mat onePriorToWindow) {
+ImageRecognitionResult FastABLE::performRecognition(const std::vector<cv::Mat> &testDescriptorsWindow, const cv::Mat onePriorToWindow) {
 //    std::cout << "FastABLE::performRecognition - start" << std::endl;
 
     // Match current window
@@ -240,7 +242,7 @@ int FastABLE::performRecognition(const std::vector<cv::Mat> &testDescriptorsWind
 
 //    std::cout << "FastABLE::performRecognition - after recognition" << std::endl;
 
-    int correctCount = 0;
+    ImageRecognitionResult imageRecognitionResult;
 
     // Go through results
     for (int i=0;i<this->mapImageSegments.size();i++) {
@@ -255,17 +257,20 @@ int FastABLE::performRecognition(const std::vector<cv::Mat> &testDescriptorsWind
             // Correct recognition
             if (resultForSegment[j] < segmentThreshold ){
 
-                std::cout << "Correct recognition! " << resultForSegment[j] << " < " << segmentThreshold << " | ";
-                std::cout << "Location: " << mapImageSegmentLocations[i][j].x << " " << mapImageSegmentLocations[i][j].y << std::endl;
+//                std::cout << "Correct recognition! " << resultForSegment[j] << " < " << segmentThreshold << " | ";
+//                std::cout << "Location: " << mapImageSegmentLocations[i][j].x << " " << mapImageSegmentLocations[i][j].y << std::endl;
 
-                // TODO: Now determine location
-                correctCount++;
+                double eps = 1e-6;
+                imageRecognitionResult.matchingWeights.push_back(1.0 / (resultForSegment[j] + eps));
+                imageRecognitionResult.matchingLocations.push_back(mapImageSegmentLocations[i][j]);
             }
         }
     }
 
+    imageRecognitionResult.correctRecognitions = imageRecognitionResult.matchingLocations.size();
+
 //    std::cout << "FastABLE::performRecognition - end" << std::endl;
-    return correctCount;
+    return imageRecognitionResult;
 }
 
 
@@ -288,12 +293,12 @@ std::vector<unsigned long long> FastABLE::automaticThresholdEstimation(const std
         tmpGroundTruthDescriptors.erase(tmpGroundTruthDescriptors.begin() + i);
 
         // Let's compute recognitions
-//        std::cout << "FastABLE - sequence id = " << i << " length = " << chosenDesc.size() << std::endl;
+        std::cout << "FastABLE - sequence id = " << i << " length = " << chosenDesc.size() << std::endl;
         unsigned long long minThreshold = determineMinimalHammingDistance(tmpGroundTruthDescriptors, chosenDesc);
 
         localThresholds.push_back(minThreshold * safetyThresholdRatio);
 
-//        std::cout << "FastABLE - minimal threshold = " << minThreshold * 1.0 / compareLength << std::endl;
+        std::cout << "FastABLE - minimal threshold = " << minThreshold * 1.0 / compareLength << std::endl;
     }
 
     // Clear for new recognition
@@ -335,11 +340,14 @@ unsigned long long FastABLE::determineMinimalHammingDistance(const std::vector<s
 
             std::vector<std::vector<unsigned long long>> matchingResult = matchWindowToSequences(trainingDescriptors, testDescriptorsWindow, onePriorToWindow, previousDistances);
 
+            std::cout << "SIZE: " << matchingResult.size() << std::endl;
+            int aaa = 0;
+
             // Current minimum
             for (auto &sequenceResult : matchingResult) {
-//                std::cout << "? " << sequenceResult.size() << std::endl;
+                std::cout << "sequenceResult: " << sequenceResult.size() << " " << trainingDescriptors[aaa].size() << std::endl;
                 unsigned long long localMin = *std::min_element(sequenceResult.begin(), sequenceResult.end());
-//                std::cout << "localMin = " << localMin << " " << sequenceResult.size() <<  std::endl;
+                std::cout << "localMin = " << localMin << " " << sequenceResult.size() <<  std::endl;
 
                 globalMin = std::min(globalMin, localMin);
             }
@@ -350,4 +358,31 @@ unsigned long long FastABLE::determineMinimalHammingDistance(const std::vector<s
 
 //    std::cout << "FastABLE::determineMinimalHammingDistance - end" << std::endl;
     return globalMin;
+}
+
+LocationXY FastABLE::bestLocationGuess(ImageRecognitionResult imageRecognitionResult) {
+    LocationXY locationXY;
+//    std::cout << "bestLocationGuess" << std::endl;
+
+    double x = 0.0, y = 0.0, weightSum = 0.0;
+    for (int i=0;i<imageRecognitionResult.matchingWeights.size();i++) {
+        x += imageRecognitionResult.matchingWeights[i] * imageRecognitionResult.matchingLocations[i].x;
+        y += imageRecognitionResult.matchingWeights[i] * imageRecognitionResult.matchingLocations[i].y;
+        weightSum += imageRecognitionResult.matchingWeights[i];
+        locationXY.id = 1;
+//        std::cout << "w=" <<  imageRecognitionResult.matchingWeights[i] << " x=" <<
+//            imageRecognitionResult.matchingLocations[i].x << " y=" << imageRecognitionResult.matchingLocations[i].y << std::endl;
+    }
+
+    if(locationXY.id > 0) {
+        locationXY.x = x / weightSum;
+        locationXY.y = y / weightSum;
+    }
+//    std::cout << "id=" <<  locationXY.id << " x=" << locationXY.x << " y=" << locationXY.y << std::endl;
+
+    if (std::isnan(locationXY.x)) {
+        std::cin >> locationXY.x;
+    }
+
+    return locationXY;
 }

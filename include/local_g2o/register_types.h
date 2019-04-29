@@ -26,6 +26,6 @@
 #include "local_g2o/vertex_one.h"
 #include "local_g2o/edge_one_prior.h"
 #include "local_g2o/edge_wall.h"
-
+#include "local_g2o/edge_vpr.h"
 
 #endif //GRAPHLOCALIZATION_REGISTER_TYPES_H

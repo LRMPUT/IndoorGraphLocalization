@@ -123,17 +123,17 @@ int main() {
 //    std::cin >> a;
 
     // Test trajectories
-//    std::vector<std::string> testTrajs{"dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_2",
-//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_3", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_4",
-//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_2",
-//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_3", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_4",
-//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_5", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_1",
-//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_2", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_3",
-//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_2",
-//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_3"};
-    std::vector<std::string> testTrajs{"dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_2",
+    std::vector<std::string> testTrajs{"dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_2",
+                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_3", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_4",
+                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_2",
                                        "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_3", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_4",
-                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_5"};
+                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_5", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_1",
+                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_2", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_3",
+                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_2",
+                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_3"};
+//    std::vector<std::string> testTrajs{"dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_2",
+//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_3", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_4",
+//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_5"};
 
     // Processing each trajectory
     std::vector<int> poseCounter(testTrajs.size(), 0), wifiCounter(testTrajs.size(), 0);
@@ -288,11 +288,14 @@ int main() {
 //                std::cout << "Img : " << imageTimestamp << std::endl;
 
                 // TODO: Processing image
-                int correctCount = fastable.addNewTestingImage(testImage[imageIndex].image);
+                LocationXY bestLocationGuess = fastable.addNewTestingImage(testImage[imageIndex].image);
 
-                if (correctCount > 0) {
+                if (bestLocationGuess.id >= 0) {
                     std::cout << "trajIndex = " << trajIndex << "  vertexId = " << graphManager.getIdOfLastVertexPose()
-                              << "  correctCount = " << correctCount << std::endl;
+                              << "  LocationGuess = " << bestLocationGuess.id << " " << bestLocationGuess.x << " " << bestLocationGuess.y << std::endl;
+
+                    int lastVertexPoseId = graphManager.getIdOfLastVertexPose();
+                    graphManager.addEdgeVPR(lastVertexPoseId, bestLocationGuess, EDGE_VPR_INF_MAT_WEIGHT);
                 }
 
                 imageIndex++;
