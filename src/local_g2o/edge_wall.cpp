@@ -24,18 +24,27 @@ namespace g2o{
             Point p1 = {P1->estimate()[0], P1->estimate()[1]};
             Point p2 = {P2->estimate()[0], P2->estimate()[1]};
 
+            // Distance of first and second pose
+            double d1 = distanceToLine(w1, w2, p1);
+            double d2 = distanceToLine(w1, w2, p2);
+
+            static double wallVicinityThreshold = 0.25;
+
             // User crosses the wall
             if ( doIntersect(w1, w2, p1, p2) ) {
 
-                // Distance of first and second pose
-                double d1 = distanceToLine(w1, w2, p1);
-                double d2 = distanceToLine(w1, w2, p2);
-
                 // Crossing increases the error
-                _error[0] += _measurement[0] * min(d1,d2);
+//                _error[0] += _measurement[0] * min(d1,d2);
+                _error[0] += _measurement[0] * (d2 + wallVicinityThreshold);
+//                std::cout << "Wall intersection in g2o! err = " << _error[0] << std::endl;
+            }
+            else if (d2 < wallVicinityThreshold) {
+                _error[0] += _measurement[0] * (wallVicinityThreshold - d2);
             }
         }
     }
+
+
 
     // EdgeWall PEN inf_matrix
     bool EdgeWall::read(std::istream& is){

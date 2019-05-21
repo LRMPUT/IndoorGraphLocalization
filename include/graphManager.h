@@ -101,6 +101,9 @@ public:
     // Optimize everything that was added to the graph
     void optimizeAll();
 
+    LocationXY getLastPoseEstimate();
+    std::vector<LocationXY> getAllPoseEstimates();
+
     void getLastVertexPose(double &x, double &y, double &theta) {
         int id = getIdOfLastVertexPose();
         g2o::VertexSE2* v = static_cast<g2o::VertexSE2*>(optimizer.vertex(id));

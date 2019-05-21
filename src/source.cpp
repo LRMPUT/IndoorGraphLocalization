@@ -48,10 +48,43 @@
 #include <algorithm>
 
 
+void drawOnBuildingPlan(const std::pair<double, cv::Mat> &buildingPlan, const std::vector<LocationXY> &allPoses, const std::vector<Wall> &wallMap) {
+
+    cv::Mat imageToShow = buildingPlan.second.clone();
+
+    for (auto location : allPoses) {
+        if (location.id < MAP_ID_INCREMENT) {
+            double pixelX = location.x * buildingPlan.first;
+            double pixelY = location.y * buildingPlan.first;
+            cv::circle(imageToShow, cv::Point(pixelX, pixelY), 3, cv::Scalar(255,0,0), 3);
+        }
+    }
+
+    for (auto wall : wallMap) {
+        double startX = wall.startX * buildingPlan.first;
+        double startY = wall.startY * buildingPlan.first;
+        double endX = wall.endX * buildingPlan.first;
+        double endY = wall.endY * buildingPlan.first;
+
+//        std::cout << startX << " " << startY<< " " << endX << " " << endY << std::endl;
+        cv::line(imageToShow, cv::Point(startX, startY), cv::Point(endX, endY), cv::Scalar(0,255,0), 3);
+    }
+
+
+    const double scaleToShow = 0.5;
+    cv::Mat scaledShow;
+    resize(imageToShow, scaledShow, scaledShow.size(), scaleToShow, scaleToShow);
+
+    cv::namedWindow( "IndoorGraphLocalization", cv::WINDOW_AUTOSIZE ); // Create a window for display.
+    cv::imshow( "IndoorGraphLocalization", scaledShow ); //
+
+    cv::waitKey(0);
+}
+
 
 void computeAndAddEdgePDR(GraphManager &graphManager, vector<double> &accWindow, std::vector<std::pair<uint64_t, double>> &accData,
        unsigned int &accIndex, unsigned int &lastAccIndex, bool &isInitialized, std::vector<std::pair<uint64_t, double>> &orientData,
-       unsigned int &orientIndex, unsigned int &lastOrientIndex, const std::vector<Wall> &wallMap) {
+       unsigned int &orientIndex, unsigned int &lastOrientIndex, const std::vector<Wall> &wallMap, const std::pair<double, cv::Mat> &buildingPlan) {
 
     double freqTime = Stepometer::computeDist(accWindow,
                                               (accData[accIndex].first - accData[lastAccIndex].first) *
@@ -85,9 +118,15 @@ void computeAndAddEdgePDR(GraphManager &graphManager, vector<double> &accWindow,
 //            graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, orientDiff, EDGE_PDR_INF_MAT_METRIC_WEIGHT, EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, EDGE_WALL_PENALTY);
 //        else
             graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, 0, EDGE_PDR_INF_MAT_METRIC_WEIGHT, EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, EDGE_WALL_PENALTY);
+
+
+        std::vector<LocationXY> allPoses = graphManager.getAllPoseEstimates();
+        std::sort(std::begin(allPoses), std::end(allPoses), [](LocationXY a, LocationXY b) {return a.id < b.id; });
+        drawOnBuildingPlan(buildingPlan, allPoses, wallMap);
     }
 
 }
+
 
 int main() {
 
@@ -106,6 +145,9 @@ int main() {
 
     // Reading information about walls
     std::vector<Wall> wallMap = DataReadWrite::readWalls("dataset/2019_04_02_PUTMC_Floor3_Experia_map");
+
+    // Reading image map
+    std::pair<double, cv::Mat> buildingPlan = DataReadWrite::readBuildingPlan("dataset/2019_04_02_PUTMC_Floor3_Experia_map");
 
     // Determines what percent of the original WiFi map we plan on keeping
     DataReadWrite::sparsifyMapPercent(wifiMap, set.mapKeepPercent);
@@ -131,9 +173,7 @@ int main() {
                                        "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_2", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_3",
                                        "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_2",
                                        "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_3"};
-//    std::vector<std::string> testTrajs{"dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_1", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_2",
-//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_3", "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_4",
-//                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_5"};
+//    std::vector<std::string> testTrajs{"dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/kc_1"};
 
     // Processing each trajectory
     std::vector<int> poseCounter(testTrajs.size(), 0), wifiCounter(testTrajs.size(), 0);
@@ -168,6 +208,7 @@ int main() {
         std::vector<LocationWiFi> successfulWiFiLocations;
 
         // Simulating motion
+        uint64_t lastUserNodeTimestamp = 0;
         while (true) {
 
             // We only consider trajectories between WiFi measurements so we end if last WiFi scan was read
@@ -216,7 +257,8 @@ int main() {
                 if (accWindow.size() >= winLen) {
                     poseNum++;
                     computeAndAddEdgePDR(graphManager, accWindow, accData, accIndex, lastAccIndex, isInitialized,
-                                         orientData, orientIndex, lastOrientIndex, wallMap);
+                                         orientData, orientIndex, lastOrientIndex, wallMap, buildingPlan);
+                    lastUserNodeTimestamp = accTimestamp;
                 }
             }
             // Process orientation
@@ -232,7 +274,8 @@ int main() {
                     double orientDiff = (orientData[orientIndex].second - orientData[lastOrientIndex].second);
                     if (fabs(orientDiff) > significant_orientation_change_threshold) {
                         computeAndAddEdgePDR(graphManager, accWindow, accData, accIndex, lastAccIndex, isInitialized,
-                                             orientData, orientIndex, lastOrientIndex, wallMap);
+                                             orientData, orientIndex, lastOrientIndex, wallMap, buildingPlan);
+                        lastUserNodeTimestamp = orientTimestamp;
                     }
                 }
 
@@ -263,7 +306,8 @@ int main() {
                     else if (accWindow.size() >= 0) {
                         poseNum++;
                         computeAndAddEdgePDR(graphManager, accWindow, accData, accIndex, lastAccIndex, isInitialized,
-                                             orientData, orientIndex, lastOrientIndex, wallMap);
+                                             orientData, orientIndex, lastOrientIndex, wallMap, buildingPlan);
+                        lastUserNodeTimestamp = wifiTimestamp;
                     }
 
                     // Adding WiFi measurement. WiFi with deadzone is not used
@@ -281,8 +325,13 @@ int main() {
                 wifiIndex++;
 
                 // Optimize as new information is available
-                if (online_optimization)
+                if (online_optimization) {
                     graphManager.optimize(250);
+
+                    std::vector<LocationXY> allPoses = graphManager.getAllPoseEstimates();
+                    std::sort(std::begin(allPoses), std::end(allPoses), [](LocationXY a, LocationXY b) {return a.id < b.id; });
+                    drawOnBuildingPlan(buildingPlan, allPoses, wallMap);
+                }
             }
             else if (timestamps[0] == imageTimestamp) {
 //                std::cout << "Img : " << imageTimestamp << std::endl;
@@ -290,12 +339,24 @@ int main() {
                 // TODO: Processing image
                 LocationXY bestLocationGuess = fastable.addNewTestingImage(testImage[imageIndex].image);
 
-                if (bestLocationGuess.id >= 0) {
+                if (bestLocationGuess.id >= 0 && fabs(imageTimestamp - lastUserNodeTimestamp) < fastableTimeDiffThreshold * 1e9) {
                     std::cout << "trajIndex = " << trajIndex << "  vertexId = " << graphManager.getIdOfLastVertexPose()
                               << "  LocationGuess = " << bestLocationGuess.id << " " << bestLocationGuess.x << " " << bestLocationGuess.y << std::endl;
 
-                    int lastVertexPoseId = graphManager.getIdOfLastVertexPose();
-                    graphManager.addEdgeVPR(lastVertexPoseId, bestLocationGuess, EDGE_VPR_INF_MAT_WEIGHT);
+                    LocationXY lastPose = graphManager.getLastPoseEstimate();
+
+                    double distance = distL2(lastPose, bestLocationGuess);
+                    std::cout << "distance : " << distance << std::endl;
+
+
+                    if (distance < acceptedVicinityThreshold) {
+                        int lastVertexPoseId = graphManager.getIdOfLastVertexPose();
+                        graphManager.addEdgeVPR(lastVertexPoseId, bestLocationGuess, EDGE_VPR_INF_MAT_WEIGHT);
+
+                        // Optimize as new information is available
+                        if (online_optimization)
+                            graphManager.optimize(250);
+                    }
                 }
 
                 imageIndex++;
@@ -316,6 +377,13 @@ int main() {
         // Stats
         poseCounter [trajIndex] = poseNum;
         wifiCounter [trajIndex] = wifiNum;
+
+        // Let's optimize
+        graphManager.optimize(100);
+
+//        int a;
+//        std::cin >> a;
+
     }
 
     // Final optimization of everything

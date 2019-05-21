@@ -152,7 +152,8 @@ def drawGT(dirName, metaGtPositions, metaGtLists, scale, outputFileName):
     print("TrajALL: Length: %.2f" % (totalLen))
     image.save(outputFileName, "png")
 
-def drawNodes(trajId, dirName, positions, pdrEdges, wknnEdges, vprEdges, metaGtPositions, metaGtLists, scale, outputFileName, outputFileName2):
+def drawNodes(trajId, dirName, positions, pdrEdges, wknnEdges, vprEdges, metaGtPositions, metaGtLists, scale, outputFileName, outputFileName2,
+              wallNode, wallNeighbours):
         
     image = Image.open("dataset/map.png").convert('RGB')
     basewidth = 3049
@@ -172,6 +173,16 @@ def drawNodes(trajId, dirName, positions, pdrEdges, wknnEdges, vprEdges, metaGtP
                     nextX = gtPositions[trajId][id2][0]* wpercent * scale;
                     nextY = gtPositions[trajId][id2][1]* wpercent * scale;
                     draw.line((prevX, prevY, nextX, nextY), fill='yellow', width=15)
+
+    for (id, list) in enumerate(wallNeighbours):
+        aX = wallNode[id][0] * wpercent * scale;
+        aY = wallNode[id][1] * wpercent * scale;
+
+        for item in list:
+            bX = wallNode[item][0] * wpercent * scale;
+            bY = wallNode[item][1] * wpercent * scale;
+
+            draw.line((aX, aY, bX, bY), fill='cyan', width=15)
 
 
     count = 0;
@@ -363,6 +374,33 @@ def readGroundTruth(dirName):
     return gtPositions, gtList
 
 
+def readWalls(dirName):
+    nodePositions = [];
+    neighbourList = [];
+    with open(dirName + "/walls.map", 'r') as f:
+        nodeNo = int(f.readline());
+        # print "NodeNo: ", nodeNo
+
+        for i in range(0, nodeNo):
+            lineSplitted = f.readline().strip('\n').split(' ')
+
+            X = float(lineSplitted[0]);
+            Y = float(lineSplitted[1]);
+            nodePositions.append((X, Y));
+
+            neighbourNo = int(f.readline());
+
+            lineSplitted = f.readline().strip('\n').split(' ')
+            neighboursForCurrentNode = []
+            for neigh in lineSplitted:
+                #        print "Neighbour: " + str(neigh);
+                neighboursForCurrentNode.append(int(neigh));
+
+            neighbourList.append(list(set(neighboursForCurrentNode)));
+
+    return nodePositions, neighbourList
+
+
 def computeErrors(id, error):
     sum = 0;
     sum2 = 0;
@@ -429,14 +467,17 @@ if len(sys.argv) == 1:
 
     # Reading and drawing ground truth
     gtPositions, gtList = readGroundTruth('dataset/')
+    wallPositions, wallNeighbours = readWalls('dataset/')
     drawGT(firstMap, gtPositions, gtList, scale, "gtMap.png")
 
 
 
     for trajId in range(0,len(gtPositions)):
-        drawNodes(trajId, firstMap, positions, pdrEdges, wknnEdges, vprEdges, gtPositions, gtList, scale, firstMap + "/traj_" + str(trajId+1) + ".png", "");
+        drawNodes(trajId, firstMap, positions, pdrEdges, wknnEdges, vprEdges, gtPositions, gtList, scale,
+                  firstMap + "/traj_" + str(trajId+1) + ".png", "", wallPositions, wallNeighbours);
+
     drawNodes(-1, firstMap, positions, pdrEdges, wknnEdges, vprEdges, gtPositions, gtList, scale,
-              firstMap + "/traj_all.png", firstMap + "/wifi.png");
+              firstMap + "/traj_all.png", firstMap + "/wifi.png", wallPositions, wallNeighbours);
 
     print "-----------"
     errors(positions, gtPositions, gtList)

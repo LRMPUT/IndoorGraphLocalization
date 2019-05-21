@@ -48,6 +48,9 @@ public:
     static std::vector<Wall> readWalls(const std::string &dirPath);
 
     static void sparsifyMapPercent(std::vector<LocationWiFi> & wifiMap, double keepPercent);
+
+
+    static std::pair<double, cv::Mat> readBuildingPlan(const std::string &dirPath);
 };
 
 

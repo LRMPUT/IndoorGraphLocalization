@@ -76,24 +76,60 @@ namespace g2o {
         {
             // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
             // for details of below formula.
-            int val = (q.y - p.y) * (r.x - q.x) -
+            double val = (q.y - p.y) * (r.x - q.x) -
                       (q.x - p.x) * (r.y - q.y);
 
-            if (val == 0) return 0;  // colinear
+            if (fabs(val) < 0.03) return 0;  // colinear if slope angles differ less by ~ 2 degrees
 
             return (val > 0)? 1: 2; // clock or counterclock wise
+        }
+
+
+        bool doIntersect(Wall wall, const VertexSE2 * P1, VertexSE2 * P2) {
+            // Wall from start to end
+            Point w1 = {wall.startX, wall.startY};
+            Point w2 = {wall.endX, wall.endY};
+
+            // Two consequitive user poses
+            Point p1 = {P1->estimate()[0], P1->estimate()[1]};
+            Point p2 = {P2->estimate()[0], P2->estimate()[1]};
+
+            // User crosses the wall
+            return  doIntersect(w1, w2, p1, p2);
         }
 
 // The main function that returns true if line segment 'p1q1'
 // and 'p2q2' intersect.
         bool doIntersect(Point p1, Point q1, Point p2, Point q2)
         {
+//            p1.x = 67.3033;
+//            p1.y = 22.3198;
+//            q1.x = 54.2185;
+//            q1.y = 5.59373;
+//
+//            p2.x = 67.6377;
+//            p2.y = 23.4431;
+//            q2.x = 68.5082;
+//            q2.y = 23.518;
+
+            double lineLength = sqrt(pow(p2.x - q2.x,2) + pow(p2.y - q2.y,2));
+//            std::cout << "Linelength: " << lineLength << std::endl;
+            if (lineLength < 0.01) {
+                double distance = distanceToLine(p1, q1, p2);
+
+                if (distance < 0.01)
+                    return true;
+                return false;
+            }
+
             // Find the four orientations needed for general and
             // special cases
             int o1 = orientation(p1, q1, p2);
             int o2 = orientation(p1, q1, q2);
             int o3 = orientation(p2, q2, p1);
             int o4 = orientation(p2, q2, q1);
+
+//            std::cout << o1 << " " << o2 << " "<< o3 << " "<< o4 << std::endl;
 
             // General case
             if (o1 != o2 && o3 != o4)
@@ -115,11 +151,49 @@ namespace g2o {
             return false; // Doesn't fall in any of the above cases
         }
 
+        double distanceToLine(Wall wall, g2o::VertexSE2 *P1, g2o::VertexSE2 *P2) {
+
+            // Wall from start to end
+            Point w1 = {wall.startX, wall.startY};
+            Point w2 = {wall.endX, wall.endY};
+
+            // Two consequitive user poses
+            Point p1 = {P1->estimate()[0], P1->estimate()[1]};
+            Point p2 = {P2->estimate()[0], P2->estimate()[1]};
+
+            // Distance of first and second pose
+            double d1 = distanceToLine(w1, w2, p1);
+            double d2 = distanceToLine(w1, w2, p2);
+
+            return min(d1, d2);
+        }
+
 
         double distanceToLine(Point p1, Point p2, Point q) {
-            double num = fabs((p2.y - p1.y)*q.x - (p2.x - p1.x)*q.y + p2.x*p1.y - p2.y*p1.x);
-            double denom = sqrt(pow(p2.y - p1.y,2) + pow(p2.x - p1.x, 2));
-            return num/denom;
+
+//            Line vector
+            double px = p2.x-p1.x;
+            double py = p2.y-p1.y;
+
+            double norm = px*px + py*py;
+
+            // Length of the projection
+            double u =  ((q.x - p1.x) * px + (q.y - p1.y) * py) / norm;
+
+            if (u > 1)
+                u = 1;
+            else if (u < 0)
+                u = 0;
+
+            // Crossing point
+            double x = p1.x + u * px;
+            double y = p1.y + u * py;
+
+            // Distance to crossing point
+            double dx = x - q.x;
+            double dy = y - q.y;
+
+            return sqrt(pow(dx,2) + pow(dy,2));
         }
     };
 

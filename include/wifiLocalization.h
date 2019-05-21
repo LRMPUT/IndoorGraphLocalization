@@ -31,6 +31,8 @@ struct LocationXY {
     double x, y;
 };
 
+double distL2(LocationXY a, LocationXY b);
+
 struct ScanResult{
     ScanResult() {}
 

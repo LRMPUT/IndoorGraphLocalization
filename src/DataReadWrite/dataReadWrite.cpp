@@ -297,18 +297,19 @@ std::vector<Wall> DataReadWrite::readWalls(const std::string &dirPath) {
                 // Neighbours
                 int numberOfNeighbours;
                 wallFile >> numberOfNeighbours;
+//                std::cout << "numberOfNeighbours: " << numberOfNeighbours << std::endl;
 
                 std::vector< uint64_t > neighbours(numberOfNeighbours,0);
                 for (int j=0;j<numberOfNeighbours;j++) {
                     wallFile >> neighbours[j];
                 }
 
-                nodesNeighbours.emplace_back(numberOfNeighbours);
+                nodesNeighbours.push_back(neighbours);
             }
         }
     }
 
-    std::cout << "[DataReadWrite::readOrient] Wall data successfully read - walls: " << nodes.size() << std::endl;
+    std::cout << "[DataReadWrite::readOrient] Wall data successfully read - walls: " << nodes.size() << " " << nodesNeighbours.size() << std::endl;
 
     // Putting it in a format that is easier to process
     std::vector<Wall> walls;
@@ -318,12 +319,16 @@ std::vector<Wall> DataReadWrite::readWalls(const std::string &dirPath) {
         wall.startX = nodes[i].first;
         wall.startY = nodes[i].second;
 
-        for (int j=0;j<nodesNeighbours.size();j++) {
-            wall.endX = nodes[j].first;
-            wall.endY = nodes[j].second;
-        }
+        for (int j=0;j<nodesNeighbours[i].size();j++) {
+            int secondIdx = nodesNeighbours[i][j];
 
-        walls.push_back(wall);
+            wall.endX = nodes[secondIdx].first;
+            wall.endY = nodes[secondIdx].second;
+
+//            std::cout << wall.startX << " " << wall.startY<< " " << wall.endX << " " << wall.endY << std::endl;
+
+            walls.push_back(wall);
+        }
     }
 
     return walls;
@@ -341,4 +346,21 @@ void DataReadWrite::sparsifyMapPercent(std::vector<LocationWiFi> & wifiMap, doub
     // Leave only some elements
     wifiMap.resize(wantedSize);
 
+}
+
+std::pair<double, cv::Mat> DataReadWrite::readBuildingPlan(const std::string &dirPath) {
+    std::pair<double, cv::Mat> result;
+
+    std::cout << "[DataReadWrite::readMap] Reading map" << std::endl;
+
+    std::ifstream scaleFile((dirPath + "/scale.map").c_str());
+    if (!scaleFile.is_open()) {
+        std::cout << "Error! Could not open " << dirPath + "/scale.map" <<
+                  std::endl;
+    }
+
+    scaleFile >> result.first;
+    result.second = cv::imread(dirPath + "/map.png");
+
+    return result;
 }

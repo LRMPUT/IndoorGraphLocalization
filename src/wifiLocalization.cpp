@@ -24,6 +24,10 @@
 static constexpr int ssThreshold = -100;
 static constexpr double sharedPercentThreshold = 0.5;
 
+double distL2(LocationXY a, LocationXY b) {
+    return std::sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+}
+
 std::pair<double, int> errorL2(const LocationWiFi &lhs, const LocationWiFi &rhs){
     int cnt = 0;
     double diff = 0.0;

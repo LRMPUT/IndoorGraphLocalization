@@ -298,7 +298,7 @@ std::vector<unsigned long long> FastABLE::automaticThresholdEstimation(const std
 
         localThresholds.push_back(minThreshold * safetyThresholdRatio);
 
-        std::cout << "FastABLE - minimal threshold = " << minThreshold * 1.0 / compareLength << std::endl;
+//        std::cout << "FastABLE - minimal threshold = " << minThreshold * 1.0 / compareLength << std::endl;
     }
 
     // Clear for new recognition
@@ -340,14 +340,14 @@ unsigned long long FastABLE::determineMinimalHammingDistance(const std::vector<s
 
             std::vector<std::vector<unsigned long long>> matchingResult = matchWindowToSequences(trainingDescriptors, testDescriptorsWindow, onePriorToWindow, previousDistances);
 
-            std::cout << "SIZE: " << matchingResult.size() << std::endl;
-            int aaa = 0;
+//            std::cout << "SIZE: " << matchingResult.size() << std::endl;
+//            int aaa = 0;
 
             // Current minimum
             for (auto &sequenceResult : matchingResult) {
-                std::cout << "sequenceResult: " << sequenceResult.size() << " " << trainingDescriptors[aaa].size() << std::endl;
+//                std::cout << "sequenceResult: " << sequenceResult.size() << " " << trainingDescriptors[aaa].size() << std::endl;
                 unsigned long long localMin = *std::min_element(sequenceResult.begin(), sequenceResult.end());
-                std::cout << "localMin = " << localMin << " " << sequenceResult.size() <<  std::endl;
+//                std::cout << "localMin = " << localMin << " " << sequenceResult.size() <<  std::endl;
 
                 globalMin = std::min(globalMin, localMin);
             }
@@ -380,9 +380,23 @@ LocationXY FastABLE::bestLocationGuess(ImageRecognitionResult imageRecognitionRe
     }
 //    std::cout << "id=" <<  locationXY.id << " x=" << locationXY.x << " y=" << locationXY.y << std::endl;
 
-    if (std::isnan(locationXY.x)) {
-        std::cin >> locationXY.x;
+    // Chceck consistency
+    for (int i=0;i<imageRecognitionResult.matchingWeights.size();i++) {
+        double errX = locationXY.x - imageRecognitionResult.matchingLocations[i].x;
+        double errY = locationXY.y - imageRecognitionResult.matchingLocations[i].y;
+        double errDist = errX*errX + errY * errY;
+        if (errDist > consistencyThreshold * consistencyThreshold)
+        {
+//            std::cout << "Consistency issue! Recognition further than " << consistencyThreshold << " meters from average" << std::endl;
+            return LocationXY();
+        }
     }
+
+
+    // TODO DEBUG
+//    if (std::isnan(locationXY.x)) {
+//        std::cin >> locationXY.x;
+//    }
 
     return locationXY;
 }

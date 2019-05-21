@@ -61,6 +61,17 @@ double GraphManager::optimize(int iterationCount) {
     // Performing optimization
     optimizer.optimize(iterationCount);
 
+    for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
+        EdgeWall *e =dynamic_cast<EdgeWall *>(*it);
+        if (e) {
+
+            double err = e->error()[0];
+
+            if ( err > 0 )
+                std::cout << "Activated: " << e->vertex(0)->id() << " " << e->vertex(1)->id() << " err = " << err << std::endl;
+        }
+    }
+
     return optimizer.chi2();
 }
 
@@ -259,6 +270,56 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
         Eigen::Matrix<double, 1, 1> infMatrixWall = Eigen::Matrix<double, 1, 1>::Identity();
         eWall->setInformation(infMatrixWall);
 
+        // Check if it is ok
+        for (auto &wall : walls) {
+
+            VertexSE2 *vPost = dynamic_cast<VertexSE2 *>(optimizer.vertex(idPost));
+            bool intersect = eWall->doIntersect(wall, vPre, vPost);
+            if (intersect) {
+                std::cout << "PROBLEM!" << std::endl;
+//
+//                std::cout << "vPre: " << vPre->estimate()[0] << " " << vPre->estimate()[1] << std::endl;
+//                std::cout << "vPost: " << vPost->estimate()[0] << " " << vPost->estimate()[1] << std::endl;
+
+
+                VertexSE2 *v1 = dynamic_cast<VertexSE2 *>(optimizer.vertex(idPre));
+
+                Eigen::Vector2d wallDirection(wall.endX - wall.startX, wall.endY - wall.startY);
+                wallDirection.normalize();
+
+                Eigen::Vector2d userDirection(vPost->estimate()[0] - vPre->estimate()[0],
+                                              vPost->estimate()[1] - vPre->estimate()[1]);
+                userDirection.normalize();
+
+                double t_nom = (vPre->estimate()[0] - wall.startX) * wallDirection[1] -
+                               (vPre->estimate()[1] - wall.startY) * wallDirection[0];
+                double t_denom = userDirection[1] * wallDirection[0] - userDirection[0] * wallDirection[1];
+
+                double t = 0.8 * t_nom / t_denom;
+
+                Eigen::Vector2d corectedLocation = Eigen::Vector2d(vPre->estimate()[0], vPre->estimate()[1]) + t * userDirection;
+
+                Eigen::Matrix<double, 3, 1> correctedEstimate;
+                correctedEstimate << corectedLocation[0], corectedLocation[1], vPost->estimate()[2];
+                vPost->setEstimate(correctedEstimate);
+
+
+
+                std::cout << "t: " << t << " userDirection: " <<  userDirection[0] << " " << userDirection[1] << std::endl;
+                std::cout << "corectedLocation: " << corectedLocation[0] << " " << corectedLocation[1] << std::endl;
+                std::cout << "Wall: (" << wall.startX << " " << wall.startY << ") (" << wall.endX << " " << wall.endY << ")" << std::endl;
+
+                // Let's check
+                bool intersect = eWall->doIntersect(wall, vPre, vPost);
+                if(intersect)
+                    std::cout << "PROBLEM remained !" << std::endl;
+                else {
+                    std::cout << "PROBLEM was solved !" << std::endl;
+                }
+//                distance = eWall->distanceToLine(wall, v1, vPost);
+//                std::cout << "DISTANCE after correction: " << distance << std::endl;
+            }
+        }
         // Adding the edge
         optimizer.addEdge(eWall);
 
@@ -324,4 +385,30 @@ void GraphManager::optimizeAll() {
         e->setLevel(0);
     }
     optimize(150);
+}
+
+LocationXY GraphManager::getLastPoseEstimate() {
+    int id = getIdOfLastVertexPose();
+
+    const g2o::VertexSE2 *vertex = dynamic_cast<const VertexSE2 *>(optimizer.vertex(id));
+    if(vertex) {
+        LocationXY result(vertex->estimate()[0], vertex->estimate()[1], id);
+        return result;
+    }
+    return LocationXY();
+}
+
+std::vector<LocationXY> GraphManager::getAllPoseEstimates() {
+
+    std::vector<LocationXY> allPoses;
+    for (auto it = optimizer.vertices().begin(); it != optimizer.vertices().end(); ++it) {
+
+        const g2o::VertexSE2 *vertex = dynamic_cast<const VertexSE2 *>(it->second);
+        if (vertex) {
+            LocationXY result(vertex->estimate()[0], vertex->estimate()[1], it->first);
+            allPoses.emplace_back(result);
+        }
+    }
+
+    return allPoses;
 }

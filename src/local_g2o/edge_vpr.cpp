@@ -11,8 +11,11 @@ namespace g2o {
         const VertexSE2 *v = static_cast<const VertexSE2 *>(_vertices[0]);
 
         // Assume error equal to zero
-        _error[0] = 0.0;
-        _error[1] = 0.0;
+        _error[0] = v->estimate()[0] - _measurement[0];
+        _error[1] = v->estimate()[1] - _measurement[1];
+
+//        std::cout << "?? " << _error[0] << " " << v->estimate()[0] << " " << _measurement[0] << std::endl;
+//        std::cout << "!! " << _error[1] << " " << v->estimate()[1] << " " << _measurement[1] << std::endl;
 
 //        // For each wall check collision
 //        for (auto & wall : walls) {
