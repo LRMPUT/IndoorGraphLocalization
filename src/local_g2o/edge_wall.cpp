@@ -28,7 +28,7 @@ namespace g2o{
             double d1 = distanceToLine(w1, w2, p1);
             double d2 = distanceToLine(w1, w2, p2);
 
-            static double wallVicinityThreshold = 0.25;
+            static double wallVicinityThreshold = 1.5;
 
             // User crosses the wall
             if ( doIntersect(w1, w2, p1, p2) ) {
@@ -38,9 +38,16 @@ namespace g2o{
                 _error[0] += _measurement[0] * (d2 + wallVicinityThreshold);
 //                std::cout << "Wall intersection in g2o! err = " << _error[0] << std::endl;
             }
-            else if (d2 < wallVicinityThreshold) {
-                _error[0] += _measurement[0] * (wallVicinityThreshold - d2);
+            else if ( d2 < wallVicinityThreshold ) {
+                double tmp = wallVicinityThreshold - d2;
+
+                _error[0] += _measurement[0] * tmp;
             }
+//            else if (d1 < wallVicinityThreshold || d2 < wallVicinityThreshold) {
+//                double tmp = std::max(wallVicinityThreshold - d2, wallVicinityThreshold - d1);
+//
+//                _error[0] += _measurement[0] * tmp;
+//            }
         }
     }
 

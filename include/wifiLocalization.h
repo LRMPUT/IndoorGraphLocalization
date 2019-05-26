@@ -79,6 +79,16 @@ public:
     double endX, endY;
 };
 
+class VisEdge{
+public:
+    VisEdge() {}
+
+    double startX, startY;
+    double endX, endY;
+
+    double r,g,b;
+};
+
 std::vector<std::pair<double, int>> wknnWeights(const std::vector<LocationWiFi> &database,
                                                 const LocationWiFi &scan,
                                                 int k);

@@ -102,7 +102,12 @@ public:
     void optimizeAll();
 
     LocationXY getLastPoseEstimate();
+    LocationXY getPoseEstimate(int id);
     std::vector<LocationXY> getAllPoseEstimates();
+
+    std::vector<VisEdge> getAllEdges();
+
+
 
     void getLastVertexPose(double &x, double &y, double &theta) {
         int id = getIdOfLastVertexPose();

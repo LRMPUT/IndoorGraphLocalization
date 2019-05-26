@@ -55,11 +55,35 @@ double GraphManager::optimize(int iterationCount) {
         return 0;
     }
 
+    // TODO: Test turning off walls
+    for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
+        EdgeWall *e =dynamic_cast<EdgeWall *>(*it);
+        if (e)
+            e->setLevel(1);
+    }
+
     // We need to initialize optimization (creating jacobians etc.)
     optimizer.initializeOptimization();
 
     // Performing optimization
     optimizer.optimize(iterationCount);
+
+    // TODO: Test turning off walls
+    for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
+        EdgeWall *e =dynamic_cast<EdgeWall *>(*it);
+        if (e)
+            e->setLevel(0);
+    }
+
+    // We need to initialize optimization (creating jacobians etc.)
+    optimizer.initializeOptimization();
+
+    // Performing optimization
+    optimizer.optimize(iterationCount);
+
+
+
+
 
     for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
         EdgeWall *e =dynamic_cast<EdgeWall *>(*it);
@@ -201,6 +225,8 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
         double estimatedStepLength = vStep->estimate()[0];
         double averageAngle = vPre->estimate()[2] + dangle / 2.0;
 
+        std::cout << "PDR: " << estimatedStepLength << " " << dangle / 2.0 * 180.0 / M_PI << std::endl;
+
         // Guess of the next pose
         // TODO: We should make sure that no wall edge is violated due to local minimums of optimization
         double x = vPre->estimate()[0] + estimatedStepLength * freqTime * cos (averageAngle);
@@ -295,7 +321,7 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
                                (vPre->estimate()[1] - wall.startY) * wallDirection[0];
                 double t_denom = userDirection[1] * wallDirection[0] - userDirection[0] * wallDirection[1];
 
-                double t = 0.8 * t_nom / t_denom;
+                double t = 0.4 * t_nom / t_denom;
 
                 Eigen::Vector2d corectedLocation = Eigen::Vector2d(vPre->estimate()[0], vPre->estimate()[1]) + t * userDirection;
 
@@ -390,6 +416,12 @@ void GraphManager::optimizeAll() {
 LocationXY GraphManager::getLastPoseEstimate() {
     int id = getIdOfLastVertexPose();
 
+
+    return getPoseEstimate(id);
+}
+
+LocationXY GraphManager::getPoseEstimate(int id) {
+
     const g2o::VertexSE2 *vertex = dynamic_cast<const VertexSE2 *>(optimizer.vertex(id));
     if(vertex) {
         LocationXY result(vertex->estimate()[0], vertex->estimate()[1], id);
@@ -411,4 +443,64 @@ std::vector<LocationXY> GraphManager::getAllPoseEstimates() {
     }
 
     return allPoses;
+}
+
+std::vector<VisEdge> GraphManager::getAllEdges() {
+
+    std::vector<VisEdge> allEdges;
+
+
+    for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
+
+        VisEdge edge;
+
+        EdgeWKNN *e =dynamic_cast<EdgeWKNN *>(*it);
+        if (e) {
+
+
+
+            const g2o::VertexSE2 *vertex = dynamic_cast<const VertexSE2 *>(e->vertices()[0]);
+            edge.startX = vertex->estimate()[0];
+            edge.startY = vertex->estimate()[1];
+
+            Eigen::Vector2d wknnEst = e->getWiFiEstimate();
+            edge.endX = wknnEst[0];
+            edge.endY = wknnEst[1];
+
+            edge.r = 255;
+            edge.g = 0;
+            edge.b = 0;
+
+            std::cout << "GraphManager::getAllEdges() : EdgeWKNN " << edge.startX << " " << edge.startY << " " << edge.endX << " " << edge.endY << std::endl;
+
+
+
+            allEdges.push_back(edge);
+        }
+
+        EdgeVPR *evpr =dynamic_cast<EdgeVPR *>(*it);
+        if (evpr) {
+
+            const g2o::VertexSE2 *vertex = dynamic_cast<const VertexSE2 *>(evpr->vertices()[0]);
+            edge.startX = vertex->estimate()[0];
+            edge.startY = vertex->estimate()[1];
+
+            double* vprEst = new double [2];
+            evpr->getMeasurementData(vprEst);
+            edge.endX = vprEst[0];
+            edge.endY = vprEst[1];
+            delete [] vprEst;
+
+            edge.r = 0;
+            edge.g = 0;
+            edge.b = 255;
+
+            std::cout << "GraphManager::getAllEdgeVPR() : EdgeVPR" << edge.startX << " " << edge.startY << " " << edge.endX << " " << edge.endY << std::endl;
+
+            allEdges.push_back(edge);
+        }
+
+    }
+
+    return allEdges;
 }

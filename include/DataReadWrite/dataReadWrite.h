@@ -18,6 +18,7 @@
 #define GRAPHLOCALIZATION_DATAREADWRITE_H
 
 #include "wifiLocalization.h"
+#include "GraphRoutes.h"
 #include <vector>
 #include <string>
 #include <iostream>
@@ -51,6 +52,8 @@ public:
 
 
     static std::pair<double, cv::Mat> readBuildingPlan(const std::string &dirPath);
+
+    static GraphRoutes readGraphRoutes(const std::string &dirPath);
 };
 
 

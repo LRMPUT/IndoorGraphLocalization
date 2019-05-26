@@ -51,7 +51,7 @@ static constexpr double fastableTimeDiffThreshold = 0.5;
 #define EDGE_WKNN_INF_MAT_WEIGHT 10 // Weight assigned to the WiFi
 #define EDGE_PDR_INF_MAT_METRIC_WEIGHT 1 // Weight assigned to metric part of the PDR
 #define EDGE_PDR_INF_MAT_ORIENT_WEIGHT 15 // Weight assigned to orientation part of the PDR
-#define EDGE_WALL_PENALTY 1 // Penalty weight of EDGE_WALL
+#define EDGE_WALL_PENALTY 10 // Penalty weight of EDGE_WALL
 #define EDGE_VPR_INF_MAT_WEIGHT 10 // Penalty weight of EDGE_VPR
 
 // Running settings
@@ -67,7 +67,7 @@ static constexpr bool add_not_localized_wifi_to_map = true;
 static constexpr bool online_optimization = true;
 static constexpr bool add_new_vertex_if_significant_orientation_change = false;
 static constexpr double significant_orientation_change_threshold = 45.0 * 3.1415265 / 180.0;
-static constexpr bool assume_initial_pose_from_wknn = false;
+static constexpr bool assume_initial_pose_from_wknn = true;
 static constexpr bool cholmod_true_pcg_false = true;
 
 static constexpr bool verbose = false;

@@ -51,6 +51,8 @@ namespace g2o {
         // Jacobians
         virtual void linearizeOplus();
 
+        Eigen::Vector2d getWiFiEstimate();
+
     protected:
         // Set the sizes of all involved elements
         void setSize(int vertices);

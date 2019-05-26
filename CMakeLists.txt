@@ -69,6 +69,7 @@ add_executable(graph_localization
         src/local_g2o/edge_wall.cpp
         src/local_g2o/edge_vpr.cpp
         src/local_g2o/register_types.cpp
+        src/GraphRoutes.cpp
         src/wifiLocalization.cpp
         src/stepometer.cpp
         src/DataReadWrite/dataReadWrite.cpp

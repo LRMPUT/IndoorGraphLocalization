@@ -335,6 +335,55 @@ std::vector<Wall> DataReadWrite::readWalls(const std::string &dirPath) {
 }
 
 
+GraphRoutes DataReadWrite::readGraphRoutes(const std::string &dirPath) {
+
+    std::cout << "[DataReadWrite::readGraphRoutes] Reading routes data" << std::endl;
+
+    GraphRoutes graphRoutes;
+
+    std::ifstream routeFile((dirPath + "/possibleRoutes.map").c_str());
+    if (!routeFile.is_open()) {
+        std::cout << "Error! Could not open " << dirPath + "/possibleRoutes.map" <<
+                  std::endl;
+    }
+
+    while (!routeFile.eof() & !routeFile.fail()) {
+
+        uint64_t numberOfNodes;
+        routeFile >> numberOfNodes;
+
+        if (!routeFile.fail()) {
+
+            // Number of nodes for the walls
+            for (int i=0;i<numberOfNodes;i++) {
+
+                // Metric position of a node
+                std::pair<double, double> position;
+                routeFile >> position.first >> position.second;
+                graphRoutes.nodes.emplace_back(position);
+
+                // Neighbours
+                int numberOfNeighbours;
+                routeFile >> numberOfNeighbours;
+//                std::cout << "numberOfNeighbours: " << numberOfNeighbours << std::endl;
+
+                std::vector< uint64_t > neighbours(numberOfNeighbours,0);
+                for (int j=0;j<numberOfNeighbours;j++) {
+                    routeFile >> neighbours[j];
+                }
+
+                graphRoutes.neighbours.push_back(neighbours);
+            }
+        }
+    }
+
+    std::cout << "[DataReadWrite::readOrient] Routes data successfully read: " << graphRoutes.nodes.size() << " " << graphRoutes.neighbours.size() << std::endl;
+
+
+    return graphRoutes;
+}
+
+
 void DataReadWrite::sparsifyMapPercent(std::vector<LocationWiFi> & wifiMap, double keepPercent) {
 
     // We leave only keepPercent of original measurements

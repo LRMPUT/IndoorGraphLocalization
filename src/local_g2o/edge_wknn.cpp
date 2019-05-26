@@ -133,5 +133,20 @@ namespace g2o {
         _dimension = 2;
     }
 
+    Eigen::Vector2d EdgeWKNN::getWiFiEstimate() {
+
+        // WiFi estimate with WiFi fingerprinting
+        Eigen::Vector2d wifiEstimate = Eigen::Vector2d::Zero();
+
+        for (unsigned int i = 0; i < _kDimension; i++) {
+            VertexSE2 *xy = static_cast<VertexSE2 *> (_vertices[1 + i]);
+
+            wifiEstimate[0] += _measurement[i] * xy->estimate().translation().x();
+            wifiEstimate[1] += _measurement[i] * xy->estimate().translation().y();
+
+        }
+        return wifiEstimate;
+    }
+
 
 } // end namespace g2o
