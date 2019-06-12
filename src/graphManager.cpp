@@ -17,7 +17,7 @@
 #include "graphManager.h"
 #include "g2o/core/sparse_optimizer_terminate_action.h"
 
-GraphManager::GraphManager(bool verbose) {
+GraphManager::GraphManager(bool verbose) : verbose(verbose){
     optimizer.setVerbose(verbose);
 
     // Creating linear solver
@@ -46,7 +46,8 @@ GraphManager::GraphManager(bool verbose) {
 
 
 double GraphManager::optimize(int iterationCount) {
-    std::cout << "[GraphManager::optimize] Vertices: " << optimizer.vertices().size() << " Edges: " << optimizer.edges().size() << std::endl;
+    if (verbose)
+        std::cout << "[GraphManager::optimize] Vertices: " << optimizer.vertices().size() << " Edges: " << optimizer.edges().size() << std::endl;
 
     // No edges -> return
     if ( optimizer.edges().size() == 0 )
@@ -55,12 +56,12 @@ double GraphManager::optimize(int iterationCount) {
         return 0;
     }
 
-    // TODO: Test turning off walls
-    for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
-        EdgeWall *e =dynamic_cast<EdgeWall *>(*it);
-        if (e)
-            e->setLevel(1);
-    }
+//    // TODO: Test turning off walls
+//    for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
+//        EdgeWall *e =dynamic_cast<EdgeWall *>(*it);
+//        if (e)
+//            e->setLevel(2);
+//    }
 
     // We need to initialize optimization (creating jacobians etc.)
     optimizer.initializeOptimization();
@@ -68,33 +69,33 @@ double GraphManager::optimize(int iterationCount) {
     // Performing optimization
     optimizer.optimize(iterationCount);
 
-    // TODO: Test turning off walls
-    for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
-        EdgeWall *e =dynamic_cast<EdgeWall *>(*it);
-        if (e)
-            e->setLevel(0);
-    }
-
-    // We need to initialize optimization (creating jacobians etc.)
-    optimizer.initializeOptimization();
-
-    // Performing optimization
-    optimizer.optimize(iterationCount);
-
-
+//    // TODO: Test turning off walls
+//    for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
+//        EdgeWall *e =dynamic_cast<EdgeWall *>(*it);
+//        if (e)
+//            e->setLevel(0);
+//    }
+//
+//    // We need to initialize optimization (creating jacobians etc.)
+//    optimizer.initializeOptimization();
+//
+//    // Performing optimization
+//    optimizer.optimize(iterationCount);
 
 
 
-    for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
-        EdgeWall *e =dynamic_cast<EdgeWall *>(*it);
-        if (e) {
 
-            double err = e->error()[0];
 
-            if ( err > 0 )
-                std::cout << "Activated: " << e->vertex(0)->id() << " " << e->vertex(1)->id() << " err = " << err << std::endl;
-        }
-    }
+//    for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
+//        EdgeWall *e =dynamic_cast<EdgeWall *>(*it);
+//        if (e) {
+//
+//            double err = e->error()[0];
+//
+//            if ( err > 0 )
+//                std::cout << "Activated: " << e->vertex(0)->id() << " " << e->vertex(1)->id() << " err = " << err << std::endl;
+//        }
+//    }
 
     return optimizer.chi2();
 }
@@ -160,8 +161,8 @@ int GraphManager::addVertexStepNodeWithPrior(const double stepPrior, bool fixed,
     ePrior->setInformation(Vector1::Identity() * infMatrixWeight);
     optimizer.addEdge(ePrior);
 
-    std::cout << "[GraphManager::addStepNode] Successfully added new VertexOne and EdgeOnePrior" << std::endl;
-
+    if (verbose)
+        std::cout << "[GraphManager::addStepNode] Successfully added new VertexOne and EdgeOnePrior" << std::endl;
 
     return currentStepNodeId;
 }
@@ -210,7 +211,8 @@ void GraphManager::addEdgeWKNN(const int &id, const std::vector<std::pair<double
         e->setInformation(Eigen::Matrix2d::Identity() * infMatrixWeight);
         optimizer.addEdge(e);
 
-        std::cout << "[GraphManager::addEdgeWKNN] Successfully added EdgeWKNN" << std::endl;
+        if (verbose)
+            std::cout << "[GraphManager::addEdgeWKNN] Successfully added EdgeWKNN" << std::endl;
     }
 }
 
@@ -225,7 +227,8 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
         double estimatedStepLength = vStep->estimate()[0];
         double averageAngle = vPre->estimate()[2] + dangle / 2.0;
 
-        std::cout << "PDR: " << estimatedStepLength << " " << dangle / 2.0 * 180.0 / M_PI << std::endl;
+        if (verbose)
+            std::cout << "PDR: " << estimatedStepLength << " " << dangle / 2.0 * 180.0 / M_PI << std::endl;
 
         // Guess of the next pose
         // TODO: We should make sure that no wall edge is violated due to local minimums of optimization
@@ -349,7 +352,8 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
         // Adding the edge
         optimizer.addEdge(eWall);
 
-        std::cout << "[GraphManager::addEdgePDR] Successful added EdgePDR with optional walls" << std::endl;
+        if (verbose)
+            std::cout << "[GraphManager::addEdgePDR] Successful added EdgePDR with optional walls" << std::endl;
     }
 }
 
@@ -376,7 +380,8 @@ void GraphManager::addEdgeVPR(const int &id, LocationXY imageRecognizedLocation,
         // Adding the edge
         optimizer.addEdge(e);
 
-        std::cout << "[GraphManager::addEdgePDR] Successful added EdgeVPR" << std::endl;
+        if (verbose)
+            std::cout << "[GraphManager::addEdgePDR] Successful added EdgeVPR" << std::endl;
     }
 }
 
@@ -471,7 +476,9 @@ std::vector<VisEdge> GraphManager::getAllEdges() {
             edge.g = 0;
             edge.b = 0;
 
-            std::cout << "GraphManager::getAllEdges() : EdgeWKNN " << edge.startX << " " << edge.startY << " " << edge.endX << " " << edge.endY << std::endl;
+            if (verbose)
+                std::cout << "GraphManager::getAllEdges() : EdgeWKNN " << edge.startX << " " << edge.startY << " " <<
+                        edge.endX << " " << edge.endY << std::endl;
 
 
 
@@ -495,7 +502,9 @@ std::vector<VisEdge> GraphManager::getAllEdges() {
             edge.g = 0;
             edge.b = 255;
 
-            std::cout << "GraphManager::getAllEdgeVPR() : EdgeVPR" << edge.startX << " " << edge.startY << " " << edge.endX << " " << edge.endY << std::endl;
+            if (verbose)
+                std::cout << "GraphManager::getAllEdgeVPR() : EdgeVPR" << edge.startX << " " << edge.startY << " " <<
+                        edge.endX << " " << edge.endY << std::endl;
 
             allEdges.push_back(edge);
         }

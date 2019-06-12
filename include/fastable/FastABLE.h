@@ -27,10 +27,8 @@ class FastABLE {
 public:
     /**
      * Initializes the visual place recognition
-     * @param patchSize
-     * @param compareLength
      */
-    FastABLE(double patchSize, int compareLength);
+    FastABLE(setFastABLE settings);
 
     /**
      * Adds image map for recognition and computes the thresholds
@@ -42,7 +40,7 @@ public:
      * Adds new image for recognition
      * @param image
      */
-    LocationXY addNewTestingImage(cv::Mat image);
+    LocationXY addNewTestingImage(cv::Mat image, LocationXY currentPose);
 
 
 private:
@@ -108,12 +106,11 @@ private:
                                                                  const std::vector<cv::Mat> &testDescriptors);
 
 
-    LocationXY bestLocationGuess(ImageRecognitionResult imageRecognitionResult);
+    LocationXY bestLocationGuess(ImageRecognitionResult imageRecognitionResult, LocationXY currentPose);
 
 
     // Parameters
-    double patchSize;
-    int compareLength;
+    setFastABLE settings;
 
     // Map stored as a series of segments of patches
     std::vector<std::vector<cv::Mat>> mapImageSegments;

@@ -134,6 +134,8 @@ public:
 
 private:
 
+    bool verbose;
+
     // Optimizer
     SparseOptimizer optimizer;
 

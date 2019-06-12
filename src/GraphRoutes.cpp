@@ -39,7 +39,7 @@ pointProjectionResult GraphRoutes::findClosestProjection(const std::pair<double,
     pPR.dist1 = pPR.dist2 = 0.0;
     double bestDist = euclideanDistance(someNode, pPR.projectionPoint);
 
-    std::cout << "A: " << pPR.projectionPoint.first << " " << pPR.projectionPoint.second << " " << bestDist << std::endl;
+//    std::cout << "A: " << pPR.projectionPoint.first << " " << pPR.projectionPoint.second << " " << bestDist << std::endl;
 
     // Finding best projection
     for (uint64_t idx = 0; idx < nodes.size(); idx++) {
@@ -87,7 +87,7 @@ pointProjectionResult GraphRoutes::findClosestProjection(const std::pair<double,
         }
     }
 
-    std::cout << "B: " << pPR.projectionPoint.first << " " << pPR.projectionPoint.second << " " << bestDist << std::endl;
+//    std::cout << "B: " << pPR.projectionPoint.first << " " << pPR.projectionPoint.second << " " << bestDist << std::endl;
 
     return pPR;
 }
@@ -122,7 +122,7 @@ std::vector<std::pair<double, double>> GraphRoutes::computePath(const std::pair<
 
     // Points lie on the same edge
     if (pPR_s.idx1 == pPR_e.idx1 && pPR_s.idx2 == pPR_e.idx2) {
-        std::cout << "TUTAJ" << std::endl;
+//        std::cout << "TUTAJ" << std::endl;
         std::vector<std::pair<double, double> > pathToGoal;
         pathToGoal.push_back(pPR_s.projectionPoint);
         pathToGoal.push_back(pPR_e.projectionPoint);
@@ -184,9 +184,9 @@ std::vector<std::pair<double, double>> GraphRoutes::computePath(const std::pair<
 //            std::cout << "Now node : " << idx << std::endl;
 
         // Updating lists
-        std::cout << stillOpen.size() << std::endl;
+//        std::cout << stillOpen.size() << std::endl;
         stillOpen.erase(std::remove(stillOpen.begin(), stillOpen.end(), idx), stillOpen.end());
-        std::cout << stillOpen.size() << std::endl;
+//        std::cout << stillOpen.size() << std::endl;
         closed.push_back(idx);
 
         // for all edges from this node

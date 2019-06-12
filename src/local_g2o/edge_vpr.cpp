@@ -14,33 +14,7 @@ namespace g2o {
         _error[0] = v->estimate()[0] - _measurement[0];
         _error[1] = v->estimate()[1] - _measurement[1];
 
-//        std::cout << "?? " << _error[0] << " " << v->estimate()[0] << " " << _measurement[0] << std::endl;
-//        std::cout << "!! " << _error[1] << " " << v->estimate()[1] << " " << _measurement[1] << std::endl;
-
-//        // For each wall check collision
-//        for (auto & wall : walls) {
-//
-//            // Wall from start to end
-//            Point w1 = {wall.startX, wall.startY};
-//            Point w2 = {wall.endX, wall.endY};
-//
-//            // Two consequitive user poses
-//            VertexSE2 * P1 = static_cast<VertexSE2 *> (_vertices[0]);
-//            VertexSE2 * P2 = static_cast<VertexSE2 *> (_vertices[1]);
-//            Point p1 = {P1->estimate()[0], P1->estimate()[1]};
-//            Point p2 = {P2->estimate()[0], P2->estimate()[1]};
-//
-//            // User crosses the wall
-//            if ( doIntersect(w1, w2, p1, p2) ) {
-//
-//                // Distance of first and second pose
-//                double d1 = distanceToLine(w1, w2, p1);
-//                double d2 = distanceToLine(w1, w2, p2);
-//
-//                // Crossing increases the error
-//                _error[0] += _measurement[0] * min(d1,d2);
-//            }
-//        }
+        // TODO: angle contraint?
     }
 
     // EdgeVPR ???? inf_matrix

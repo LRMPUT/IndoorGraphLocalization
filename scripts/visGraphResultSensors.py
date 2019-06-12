@@ -110,6 +110,8 @@ def getColor(x, n):
 
 
 def drawGT(dirName, metaGtPositions, metaGtLists, scale, outputFileName):
+    gtCount = 15;
+
     image = Image.open("dataset/map.png").convert('RGB')
     basewidth = 3049
     # wpercent = (basewidth/float(image.size[0]))
@@ -125,7 +127,7 @@ def drawGT(dirName, metaGtPositions, metaGtLists, scale, outputFileName):
     # All of the GTS
     circleSize = 15;
     totalLen = 0;
-    for trajId in range(0,24):
+    for trajId in range(0,gtCount):
         len = 0;
         for (id, list) in enumerate(gtPositions[trajId]):
             for id2 in gtList[trajId][id]:
@@ -136,12 +138,15 @@ def drawGT(dirName, metaGtPositions, metaGtLists, scale, outputFileName):
                     nextY = gtPositions[trajId][id2][1]* wpercent * scale;
                     draw.line((prevX, prevY, nextX, nextY), fill=color, width=15)
 
+                    # if trajId == 0:
+                    #     print gtPositions[trajId][id][0], gtPositions[trajId][id][1], gtPositions[trajId][id2][0], gtPositions[trajId][id2][1]
+
                     len = len + math.sqrt((gtPositions[trajId][id2][0] - gtPositions[trajId][id][0])* \
                                           (gtPositions[trajId][id2][0] - gtPositions[trajId][id][0]) + \
                                           (gtPositions[trajId][id2][1] - gtPositions[trajId][id][1])* \
                                           (gtPositions[trajId][id2][1] - gtPositions[trajId][id][1]));
 
-        color = getColor(colorNo, 25);
+        color = getColor(colorNo, gtCount);
         colorNo = colorNo + 1;
         draw.ellipse((35 - circleSize, 35 * colorNo - circleSize, 35 + circleSize, 35 * colorNo + circleSize),
                          fill=color,
@@ -344,11 +349,16 @@ def readGroundTruth(dirName):
 
     gtPositions = [];
     gtList = [];
-    for trajId in range (1,25):
+    for trajId in range (1,16):
         nodePositions = [];
         neighbourList = [];
+        distance = 0;
         with open(dirName + "GT/" + str(trajId) + "/nodes.map", 'r') as f:
             nodeNo = int(f.readline());
+
+            # lastX = -1;
+            # lastY = -1;
+            # start = 1;
             # print "NodeNo: ", nodeNo
 
             for i in range(0, nodeNo):
@@ -357,6 +367,19 @@ def readGroundTruth(dirName):
                 X = float(lineSplitted[0]);
                 Y = float(lineSplitted[1]);
                 nodePositions.append((X, Y));
+
+                #print start
+                # if start == 0:
+                #     if trajId == 1:
+                #         print lastX, lastY, X, Y
+                #
+                #     distance = distance + math.sqrt((lastX - X)*(lastX - X) + (lastY - Y)*(lastY - Y));
+                #
+                # else:
+                #     start = 0;
+                #
+                # lastX = X;
+                # lastY = Y;
 
                 neighbourNo = int(f.readline());
 
@@ -368,8 +391,12 @@ def readGroundTruth(dirName):
 
                 neighbourList.append(list(set(neighboursForCurrentNode)));
 
+
         gtPositions.append(nodePositions);
         gtList.append(neighbourList);
+        # print trajId, " ", distance
+
+
 
     return gtPositions, gtList
 

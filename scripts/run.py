@@ -49,20 +49,29 @@ parameterFileName = "parameters.txt";
 #mapKeepPercent = [0.5, 0.5, 0.6, 0.6, 0.7, 0.7, 0.8, 0.8, 0.9, 0.9, 1.0, 1.0];
 #stepLengthEstimation = ["true", "true", "true", "true", "true", "true", "true", "true", "true", "true", "true", "true"];
 runsPerSequence = 1;
+# interUserConnections = ["false", "false", "false", "false", "false", "false", "false", "false"];
+# stepLengthEstimation = ["false", "false", "false", "false", "false", "false", "false", "false"];
+# mapKeepPercent = [0.5, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0];
+# vprWeight = [0.0, 0.0, 10.0, 10.0, 0.0, 0.0, 10.0, 10.0];
+# wallWeight = [0.0, 10.0, 0.0, 10.0, 0.0, 10.0, 0.0, 10.0];
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
 mapKeepPercent = [1.0];
+vprWeight = [10.0];
+wallWeight = [0.0];
 
 # For chosen parameters
-for (iUC, mKP, sLE) in zip(interUserConnections, mapKeepPercent, stepLengthEstimation):
+for (iUC, mKP, sLE, vpr, wall) in zip(interUserConnections, mapKeepPercent, stepLengthEstimation, vprWeight, wallWeight):
 
     # Changing parameters to selected values
     setYamlFile(parameterFileName, "interUserConnections ", iUC);
     setYamlFile(parameterFileName, "mapKeepPercent ", mKP);
     setYamlFile(parameterFileName, "stepLengthEstimation ", sLE);
+    setYamlFile(parameterFileName, "EDGE_VPR_INF_MAT_WEIGHT ", vpr);
+    setYamlFile(parameterFileName, "EDGE_WALL_PENALTY ", wall);
 
     # Path depending on the parameters
-    dir = "iUC_" + str(iUC) + "_mKP_" + str(mKP) + "_sLE_" + str(sLE);
+    dir = "iUC_" + str(iUC) + "_mKP_" + str(mKP) + "_sLE_" + str(sLE) + "_vpr_" + str(vpr) + "_wall_" + str(wall);
 
     # For all selected sequences
     for i in range(0, runsPerSequence):

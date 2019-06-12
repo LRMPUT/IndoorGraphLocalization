@@ -42,20 +42,79 @@ void DataReadWrite::readParameters(std::string filename, settings &set) {
                 else
                     set.interUserConnections = true;
             }
-
-            if (line == "stepLengthEstimation") {
+            else if (line == "stepLengthEstimation") {
                 getline(file, line);
                 if (line == "false")
                     set.stepLengthEstimation = false;
                 else
                     set.stepLengthEstimation = true;
             }
-
-            if (line == "mapKeepPercent") {
+            else  if (line == "mapKeepPercent") {
                 getline(file, line);
                 set.mapKeepPercent = std::stod(line);
             }
+            else  if (line == "EDGE_PRIOR_VAL") {
+                getline(file, line);
+                set.EDGE_PRIOR_VAL = std::stod(line);
+            }
+            else  if (line == "EDGE_PRIOR_INF_MAT_WEIGHT") {
+                getline(file, line);
+                set.EDGE_PRIOR_INF_MAT_WEIGHT = std::stod(line);
+            }
+            else  if (line == "EDGE_WKNN_INF_MAT_WEIGHT") {
+                getline(file, line);
+                set.EDGE_WKNN_INF_MAT_WEIGHT = std::stod(line);
+            }
+            else  if (line == "EDGE_PDR_INF_MAT_METRIC_WEIGHT") {
+                getline(file, line);
+                set.EDGE_PDR_INF_MAT_METRIC_WEIGHT = std::stod(line);
+            }
+            else  if (line == "EDGE_PDR_INF_MAT_ORIENT_WEIGHT") {
+                getline(file, line);
+                set.EDGE_PDR_INF_MAT_ORIENT_WEIGHT = std::stod(line);
+            }
+            else  if (line == "EDGE_WALL_PENALTY") {
+                getline(file, line);
+                set.EDGE_WALL_PENALTY = std::stod(line);
+            }
+            else if (line == "EDGE_VPR_INF_MAT_WEIGHT") {
+                getline(file, line);
+                set.EDGE_VPR_INF_MAT_WEIGHT = std::stod(line);
+            }
 
+            else if (line == "FASTABLE_patchSize") {
+                getline(file, line);
+                set.fastAble.patchSize = std::stod(line);
+            }
+            else if (line == "FASTABLE_compareLength") {
+                getline(file, line);
+                set.fastAble.compareLength = std::stod(line);
+            }
+            else if (line == "FASTABLE_safetyThresholdRatio") {
+                getline(file, line);
+                set.fastAble.safetyThresholdRatio = std::stod(line);
+            }
+            else if (line == "FASTABLE_earlyAcceptedVicinity") {
+                getline(file, line);
+                set.fastAble.earlyAcceptedVicinity = std::stod(line);
+            }
+            else if (line == "FASTABLE_consistencyThreshold") {
+                getline(file, line);
+                set.fastAble.consistencyThreshold = std::stod(line);
+            }
+            else if (line == "FASTABLE_acceptedVicinityThreshold") {
+                getline(file, line);
+                set.fastAble.acceptedVicinityThreshold = std::stod(line);
+            }
+            else if (line == "FASTABLE_timeDiffThreshold") {
+                getline(file, line);
+                set.fastAble.timeDiffThreshold = std::stod(line);
+            }
+
+            else {
+                std::cout << "Line not recognized!" << std::endl;
+                getline(file,line);
+            }
         }
         file.close();
     }
@@ -64,6 +123,17 @@ void DataReadWrite::readParameters(std::string filename, settings &set) {
     std::cout << "\tinterUserConnections = " << set.interUserConnections << std::endl;
     std::cout << "\tstepLengthEstimation = " << set.stepLengthEstimation << std::endl;
     std::cout << "\tmapKeepPercent = " << set.mapKeepPercent << std::endl;
+    std::cout << "\tEDGE_WALL_PENALTY = " << set.EDGE_WALL_PENALTY << std::endl;
+    std::cout << "\tEDGE_VPR_INF_MAT_WEIGHT = " << set.EDGE_VPR_INF_MAT_WEIGHT << std::endl;
+
+    std::cout << "\tFastABLE:" << std::endl;
+    std::cout << "\t\tpatchSize = " << set.fastAble.patchSize << std::endl;
+    std::cout << "\t\tcompareLength = " << set.fastAble.compareLength << std::endl;
+    std::cout << "\t\tsafetyThresholdRatio = " << set.fastAble.safetyThresholdRatio << std::endl;
+    std::cout << "\t\tearlyAcceptedVicinity = " << set.fastAble.earlyAcceptedVicinity << std::endl;
+    std::cout << "\t\tconsistencyThreshold = " << set.fastAble.consistencyThreshold << std::endl;
+    std::cout << "\t\tacceptedVicinityThreshold = " << set.fastAble.acceptedVicinityThreshold << std::endl;
+    std::cout << "\t\ttimeDiffThreshold = " << set.fastAble.timeDiffThreshold << std::endl;
 }
 
 std::vector<LocationWiFi> DataReadWrite::readMap(const std::string &dirPath,

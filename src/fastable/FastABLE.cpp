@@ -4,7 +4,7 @@
 
 #include "fastable/FastABLE.h"
 
-FastABLE::FastABLE(double patchSize, int compareLength) : patchSize(patchSize), compareLength(compareLength) {
+FastABLE::FastABLE(setFastABLE settings) : settings(settings) {
 
 
 }
@@ -21,7 +21,7 @@ void FastABLE::addImageMap(const std::vector<LocationImage> &imageMap) {
         if (!imageSegment.empty() && imageMap[i - 1].segmentId != imageMap[i].segmentId) {
 
             // Only adding if segment is larger than compareLength
-            if (imageSegment.size() > compareLength) {
+            if (imageSegment.size() > settings.compareLength) {
                 mapImageSegments.push_back(imageSegment);
                 mapImageSegmentLocations.push_back(imageSegmentLocations);
             }
@@ -37,7 +37,7 @@ void FastABLE::addImageMap(const std::vector<LocationImage> &imageMap) {
 
 
     // Only adding if segment is larger than compareLength
-    if (imageSegment.size() > compareLength) {
+    if (imageSegment.size() > settings.compareLength) {
         mapImageSegments.push_back(imageSegment);
         mapImageSegmentLocations.push_back(imageSegmentLocations);
     }
@@ -53,7 +53,7 @@ void FastABLE::addImageMap(const std::vector<LocationImage> &imageMap) {
 }
 
 
-LocationXY FastABLE::addNewTestingImage(cv::Mat image) {
+LocationXY FastABLE::addNewTestingImage(cv::Mat image, LocationXY currentPose) {
 
     // Computing descriptor
     cv::Mat imgDesc = global_description(image);
@@ -61,7 +61,7 @@ LocationXY FastABLE::addNewTestingImage(cv::Mat image) {
 
 
     // Moving window of images, also saving the last one not in the window
-    if (imgDescWindow.size() > compareLength) {
+    if (imgDescWindow.size() > settings.compareLength) {
 
         lastImageNotInWindow = imgDescWindow.front();
         imgDescWindow.erase(imgDescWindow.begin());
@@ -69,10 +69,10 @@ LocationXY FastABLE::addNewTestingImage(cv::Mat image) {
 
     // TODO Recognition
     ImageRecognitionResult imageRecognitionResult;
-    if (imgDescWindow.size() == compareLength) {
+    if (imgDescWindow.size() == settings.compareLength) {
         imageRecognitionResult = performRecognition(imgDescWindow, lastImageNotInWindow);
 
-        LocationXY bestGuess = bestLocationGuess(imageRecognitionResult);
+        LocationXY bestGuess = bestLocationGuess(imageRecognitionResult, currentPose);
         return bestGuess;
     }
 
@@ -95,14 +95,14 @@ cv::Mat FastABLE::global_description(cv::Mat imageIn) {
 
     // Resize the image
     cv::Mat image_resized;
-    cv::resize(image, image_resized, cv::Size(patchSize, patchSize), 0, 0,
+    cv::resize(image, image_resized, cv::Size(settings.patchSize, settings.patchSize), 0, 0,
                INTER_LINEAR);
 
     // Select the central keypoint
     std::vector<cv::KeyPoint> kpts;
     cv::KeyPoint kpt;
-    kpt.pt.x = patchSize / 2 + 1;
-    kpt.pt.y = patchSize / 2 + 1;
+    kpt.pt.x = settings.patchSize / 2 + 1;
+    kpt.pt.y = settings.patchSize / 2 + 1;
     kpt.size = 1.0;
     kpt.angle = 0.0;
     kpts.push_back(kpt);
@@ -153,22 +153,22 @@ std::vector<unsigned long long> FastABLE::matchWindowToSingleSequence(int imageC
     std::vector<unsigned long long> nextPreviousDistances;
 
     for (int trainingShift = 0;
-         trainingShift < trainingSize - compareLength - 1;
+         trainingShift < trainingSize - settings.compareLength - 1;
          trainingShift++) {
 
 
         unsigned long long distance = 0;
 
         // If it is possible to make it faster
-        if (imageCounter != compareLength - 1 // Not first iteration
+        if (imageCounter != settings.compareLength - 1 // Not first iteration
             && previousDistances.empty() == false // We have previous distances
             && trainingShift != 0 // It has to be computed normally
             ) {
 
             // We compute current result as a result from previous iteration adding last and subtracting first
             distance = previousDistances[trainingShift - 1]
-                       + hamming_matching(testDescriptorsWindow[compareLength - 1],
-                                          trainingDescriptors[trainingShift + compareLength - 1])
+                       + hamming_matching(testDescriptorsWindow[settings.compareLength - 1],
+                                          trainingDescriptors[trainingShift + settings.compareLength - 1])
                        - hamming_matching(onePriorToWindow,
                                           trainingDescriptors[trainingShift - 1]);
 
@@ -178,7 +178,7 @@ std::vector<unsigned long long> FastABLE::matchWindowToSingleSequence(int imageC
         // Computing everything for 1st window and for every first comparison for a new frame
         else {
             // for each element in the sequence to be matched
-            for (int k = 0; k < compareLength; k++) {
+            for (int k = 0; k < settings.compareLength; k++) {
 
                 // Distance between:
                 // 		testDescriptorsWindow
@@ -188,7 +188,7 @@ std::vector<unsigned long long> FastABLE::matchWindowToSingleSequence(int imageC
                                               trainingDescriptors[trainingShift + k]);
             }
             // if we just started, we initialize the previousDistances to later use modified recurrence
-            if (imageCounter == compareLength - 1)
+            if (imageCounter == settings.compareLength - 1)
                 nextPreviousDistances.push_back(distance);
 
             // the first comparison when we already have previous distances
@@ -296,7 +296,7 @@ std::vector<unsigned long long> FastABLE::automaticThresholdEstimation(const std
         std::cout << "FastABLE - sequence id = " << i << " length = " << chosenDesc.size() << std::endl;
         unsigned long long minThreshold = determineMinimalHammingDistance(tmpGroundTruthDescriptors, chosenDesc);
 
-        localThresholds.push_back(minThreshold * safetyThresholdRatio);
+        localThresholds.push_back(minThreshold * settings.safetyThresholdRatio);
 
 //        std::cout << "FastABLE - minimal threshold = " << minThreshold * 1.0 / compareLength << std::endl;
     }
@@ -323,7 +323,7 @@ unsigned long long FastABLE::determineMinimalHammingDistance(const std::vector<s
     for (int imageIndex = 0; imageIndex < testDescriptors.size(); imageIndex++) {
 
         // Selecting window
-        int indexBegin = std::max(0, imageIndex - compareLength + 1);
+        int indexBegin = std::max(0, imageIndex - settings.compareLength + 1);
         int indexLast = imageIndex;
         std::vector<cv::Mat> testDescriptorsWindow(testDescriptors.begin() + indexBegin,
                                                    testDescriptors.begin() + indexLast + 1);
@@ -336,7 +336,7 @@ unsigned long long FastABLE::determineMinimalHammingDistance(const std::vector<s
 //        std::cout << indexBegin << " " << indexLast << " " << testDescriptorsWindow.size() << " " << imageCounter << std::endl;
 
         // Proper size for comparison
-        if(testDescriptorsWindow.size() == compareLength) {
+        if(testDescriptorsWindow.size() == settings.compareLength) {
 
             std::vector<std::vector<unsigned long long>> matchingResult = matchWindowToSequences(trainingDescriptors, testDescriptorsWindow, onePriorToWindow, previousDistances);
 
@@ -360,43 +360,101 @@ unsigned long long FastABLE::determineMinimalHammingDistance(const std::vector<s
     return globalMin;
 }
 
-LocationXY FastABLE::bestLocationGuess(ImageRecognitionResult imageRecognitionResult) {
-    LocationXY locationXY;
-//    std::cout << "bestLocationGuess" << std::endl;
+LocationXY FastABLE::bestLocationGuess(ImageRecognitionResult imageRecognitionResult, LocationXY currentPose) {
 
-    double x = 0.0, y = 0.0, weightSum = 0.0;
-    for (int i=0;i<imageRecognitionResult.matchingWeights.size();i++) {
-        x += imageRecognitionResult.matchingWeights[i] * imageRecognitionResult.matchingLocations[i].x;
-        y += imageRecognitionResult.matchingWeights[i] * imageRecognitionResult.matchingLocations[i].y;
-        weightSum += imageRecognitionResult.matchingWeights[i];
-        locationXY.id = 1;
+
+
+    LocationXY locationEstimate;
+    for(int j=0;j<3;j++)
+    {
+        double x = 0.0, y = 0.0, weightSum = 0.0;
+        locationEstimate.id = -1;
+        std::vector<int> indiciesToRemove;
+
+        // For all matches
+        for (int i = 0; i < imageRecognitionResult.matchingWeights.size(); i++) {
+
+            // Current recognition
+            LocationXY &guess = imageRecognitionResult.matchingLocations[i];
+
+            // Distant to the current estimate
+            double distance = distL2(guess, currentPose);
+
+            // Recognition has to be closer than 5 meters to the current position estimate
+            if (distance < settings.earlyAcceptedVicinity) {
+                x += imageRecognitionResult.matchingWeights[i] * imageRecognitionResult.matchingLocations[i].x;
+                y += imageRecognitionResult.matchingWeights[i] * imageRecognitionResult.matchingLocations[i].y;
+                weightSum += imageRecognitionResult.matchingWeights[i];
+                locationEstimate.id = 1;
+            }
+            else {
+//                std::cout << "indiciesToRemove - add " << i << std::endl;
+                indiciesToRemove.push_back(i);
+            }
 //        std::cout << "w=" <<  imageRecognitionResult.matchingWeights[i] << " x=" <<
 //            imageRecognitionResult.matchingLocations[i].x << " y=" << imageRecognitionResult.matchingLocations[i].y << std::endl;
-    }
+        }
 
-    if(locationXY.id > 0) {
-        locationXY.x = x / weightSum;
-        locationXY.y = y / weightSum;
-    }
-//    std::cout << "id=" <<  locationXY.id << " x=" << locationXY.x << " y=" << locationXY.y << std::endl;
-
-    // Chceck consistency
-    for (int i=0;i<imageRecognitionResult.matchingWeights.size();i++) {
-        double errX = locationXY.x - imageRecognitionResult.matchingLocations[i].x;
-        double errY = locationXY.y - imageRecognitionResult.matchingLocations[i].y;
-        double errDist = errX*errX + errY * errY;
-        if (errDist > consistencyThreshold * consistencyThreshold)
-        {
-//            std::cout << "Consistency issue! Recognition further than " << consistencyThreshold << " meters from average" << std::endl;
+        // No matches found
+        if (locationEstimate.id == -1)
             return LocationXY();
+
+        // Computing current estimate
+        locationEstimate.x = x / weightSum;
+        locationEstimate.y = y / weightSum;
+
+        if (indiciesToRemove.size() == 0)
+            return locationEstimate;
+
+
+//        std::cout << "id=" <<  locationEstimate.id << " x=" << locationEstimate.x << " y=" << locationEstimate.y << std::endl;
+
+        sort(indiciesToRemove.begin(), indiciesToRemove.end(), std::greater<int>());
+        for (int i=0;i<indiciesToRemove.size();i++) {
+            int idx = indiciesToRemove[i];
+//            std::cout << "Removing 1 : " << idx << " " << imageRecognitionResult.matchingWeights.size() << std::endl;
+            imageRecognitionResult.matchingWeights.erase(imageRecognitionResult.matchingWeights.begin() + idx);
+            imageRecognitionResult.matchingLocations.erase(imageRecognitionResult.matchingLocations.begin() + idx);
+        }
+        indiciesToRemove.clear();
+
+        // Chceck consistency w.r.t the estimate
+        for (int i = 0; i < imageRecognitionResult.matchingWeights.size(); i++) {
+
+            // Computing the distance to average
+            double errDist = distL2(locationEstimate, imageRecognitionResult.matchingLocations[i]);
+
+            // Removing that match
+            if (errDist > settings.consistencyThreshold) {
+//                std::cout << "indiciesToRemove -  consistency add " << i << std::endl;
+//            std::cout << "Consistency issue! Recognition further than " << consistencyThreshold << " meters from average" << std::endl;
+                indiciesToRemove.push_back(i);
+            }
+        }
+
+        // We reach equilibrium
+//        if (indiciesToRemove.size() == 0)
+//            break;
+
+//        std::cout << "Removing - start" << std::endl;
+
+        // We need to further remove some matches
+        sort(indiciesToRemove.begin(), indiciesToRemove.end(), std::greater<int>());
+
+        for (int i=0;i<indiciesToRemove.size();i++) {
+            int idx = indiciesToRemove[i];
+//            std::cout << "Removing 2: " << idx << " " << imageRecognitionResult.matchingWeights.size() << std::endl;
+            imageRecognitionResult.matchingWeights.erase(imageRecognitionResult.matchingWeights.begin() + idx);
+            imageRecognitionResult.matchingLocations.erase(imageRecognitionResult.matchingLocations.begin() + idx);
         }
     }
 
+    std::cout << "id=" <<  locationEstimate.id << " x=" << locationEstimate.x << " y=" << locationEstimate.y << std::endl;
 
     // TODO DEBUG
 //    if (std::isnan(locationXY.x)) {
 //        std::cin >> locationXY.x;
 //    }
 
-    return locationXY;
+    return locationEstimate;
 }

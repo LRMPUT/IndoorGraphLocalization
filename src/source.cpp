@@ -151,7 +151,7 @@ void drawOnBuildingPlan(const std::pair<double, cv::Mat> &buildingPlan, const st
 void visualize(GraphManager &graphManager, const vector<Wall> &wallMap, const pair<double, Mat> &buildingPlan,
                const GraphRoutes &graphRoutes, std::vector<std::pair<double,double>> &lastPlannedPath, bool pre) {
 
-//    return;
+    return;
 
     vector<LocationXY> allPoses = graphManager.getAllPoseEstimates();
     sort(begin(allPoses), end(allPoses), [](LocationXY a, LocationXY b) { return a.id < b.id; });
@@ -166,7 +166,8 @@ void computeAndAddEdgePDR(GraphManager &graphManager, vector<double> &accWindow,
                           std::vector<std::pair<uint64_t, double>> &orientData,
                           unsigned int &orientIndex, unsigned int &lastOrientIndex, const std::vector<Wall> &wallMap,
                           const std::pair<double, cv::Mat> &buildingPlan,
-                          const GraphRoutes &graphRoutes) {
+                          const GraphRoutes &graphRoutes,
+                          settings &set) {
 
     double freqTime = Stepometer::computeDist(accWindow,
                                               (accData[accIndex].first - accData[lastAccIndex].first) *
@@ -197,11 +198,11 @@ void computeAndAddEdgePDR(GraphManager &graphManager, vector<double> &accWindow,
 
         // Do we intent on using orientation in the optimization
         if (pdr_with_orientation_estimation)
-            graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, orientDiff, EDGE_PDR_INF_MAT_METRIC_WEIGHT,
-                                    EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, EDGE_WALL_PENALTY);
+            graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, orientDiff, set.EDGE_PDR_INF_MAT_METRIC_WEIGHT,
+                set.EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, set.EDGE_WALL_PENALTY);
         else
-            graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, 0, EDGE_PDR_INF_MAT_METRIC_WEIGHT,
-                                    EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, EDGE_WALL_PENALTY);
+            graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, 0, set.EDGE_PDR_INF_MAT_METRIC_WEIGHT,
+                set.EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, set.EDGE_WALL_PENALTY);
 
         std::vector<std::pair<double,double>> empty;
         visualize(graphManager, wallMap, buildingPlan, graphRoutes, empty, true);
@@ -251,7 +252,7 @@ int main() {
     graphManager.addVerticesForInitialWiFiMap(wifiMap);
 
     // Initialize FastABLE
-    FastABLE fastable(patchSize, compareLength);
+    FastABLE fastable(set.fastAble);
 
     // Add map to FastABLE
     fastable.addImageMap(imageMap);
@@ -359,7 +360,7 @@ int main() {
                 if (accWindow.size() >= winLen) {
                     poseNum++;
                     computeAndAddEdgePDR(graphManager, accWindow, accData, accIndex, lastAccIndex, isInitialized,
-                                         orientData, orientIndex, lastOrientIndex, wallMap, buildingPlan, graphRoutes);
+                                         orientData, orientIndex, lastOrientIndex, wallMap, buildingPlan, graphRoutes, set);
                     lastUserNodeTimestamp = accTimestamp;
                 }
             }
@@ -377,7 +378,7 @@ int main() {
                     if (fabs(orientDiff) > significant_orientation_change_threshold) {
                         computeAndAddEdgePDR(graphManager, accWindow, accData, accIndex, lastAccIndex, isInitialized,
                                              orientData, orientIndex, lastOrientIndex, wallMap, buildingPlan,
-                                             graphRoutes);
+                                             graphRoutes, set);
                         lastUserNodeTimestamp = orientTimestamp;
                     }
                 }
@@ -400,8 +401,8 @@ int main() {
                         graphManager.addVertexPose(0, 0, 0, false);
 
                         // Adding initial step length
-                        graphManager.addVertexStepNodeWithPrior(EDGE_PRIOR_VAL, !set.stepLengthEstimation,
-                                                                EDGE_PRIOR_INF_MAT_WEIGHT);
+                        graphManager.addVertexStepNodeWithPrior(set.EDGE_PRIOR_VAL, !set.stepLengthEstimation,
+                                                                set.EDGE_PRIOR_INF_MAT_WEIGHT);
 
                         isInitialized = true;
                     }
@@ -410,14 +411,14 @@ int main() {
                         poseNum++;
                         computeAndAddEdgePDR(graphManager, accWindow, accData, accIndex, lastAccIndex, isInitialized,
                                              orientData, orientIndex, lastOrientIndex, wallMap, buildingPlan,
-                                             graphRoutes);
+                                             graphRoutes, set);
                         lastUserNodeTimestamp = wifiTimestamp;
                     }
 
                     // Adding WiFi measurement. WiFi with deadzone is not used
                     wifiNum++;
                     int lastVertexPoseId = graphManager.getIdOfLastVertexPose();
-                    graphManager.addEdgeWKNN(lastVertexPoseId, edgeWknnWeights, EDGE_WKNN_INF_MAT_WEIGHT);
+                    graphManager.addEdgeWKNN(lastVertexPoseId, edgeWknnWeights, set.EDGE_WKNN_INF_MAT_WEIGHT);
 
                     if(wifiNum > 1) {
 
@@ -452,23 +453,22 @@ int main() {
 //                std::cout << "Img : " << imageTimestamp << std::endl;
 
                 // TODO: Processing image
-                LocationXY bestLocationGuess = fastable.addNewTestingImage(testImage[imageIndex].image);
+                LocationXY currentPose = graphManager.getLastPoseEstimate();
+                LocationXY bestLocationGuess = fastable.addNewTestingImage(testImage[imageIndex].image, currentPose);
 
                 if (bestLocationGuess.id >= 0 &&
-                    fabs(imageTimestamp - lastUserNodeTimestamp) < fastableTimeDiffThreshold * 1e9) {
-                    std::cout << "trajIndex = " << trajIndex << "  vertexId = " << graphManager.getIdOfLastVertexPose()
+                    fabs(imageTimestamp - lastUserNodeTimestamp) < set.fastAble.timeDiffThreshold * 1e9) {
+                    std::cout << "VPR: trajIndex = " << trajIndex << "  vertexId = " << graphManager.getIdOfLastVertexPose()
                               << "  LocationGuess = " << bestLocationGuess.id << " " << bestLocationGuess.x << " "
                               << bestLocationGuess.y << std::endl;
 
-                    LocationXY lastPose = graphManager.getLastPoseEstimate();
 
-                    double distance = distL2(lastPose, bestLocationGuess);
-                    std::cout << "distance : " << distance << std::endl;
+                    // Is recognition in accepted distance to current pose?
+                    double distance = distL2(currentPose, bestLocationGuess);
 
-
-                    if (distance < acceptedVicinityThreshold) {
+                    if (distance < set.fastAble.acceptedVicinityThreshold) {
                         int lastVertexPoseId = graphManager.getIdOfLastVertexPose();
-                        graphManager.addEdgeVPR(lastVertexPoseId, bestLocationGuess, EDGE_VPR_INF_MAT_WEIGHT);
+                        graphManager.addEdgeVPR(lastVertexPoseId, bestLocationGuess, set.EDGE_VPR_INF_MAT_WEIGHT);
 
                         // Optimize as new information is available
                         if (online_optimization)
@@ -501,7 +501,7 @@ int main() {
 //        int a;
 //        std::cin >> a;
 
-        break;
+//        break;
 
     }
 

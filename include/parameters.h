@@ -38,27 +38,48 @@ static constexpr double freqMax = 2.2;
 static constexpr double fftMagThresh = 0.2;
 
 // FASTABLE
-static constexpr double patchSize = 64;
-static constexpr int compareLength = 50;
-static constexpr double safetyThresholdRatio = 1.1;
-static constexpr double consistencyThreshold = 3;
-static constexpr double acceptedVicinityThreshold = 10;
-static constexpr double fastableTimeDiffThreshold = 0.5;
+//static constexpr double patchSize = 64;
+//static constexpr int compareLength = 50;
+//static constexpr double safetyThresholdRatio = 1.2;
+//static constexpr double earlyAcceptedVicinity = 5;
+//static constexpr double consistencyThreshold = 3;
+//static constexpr double acceptedVicinityThreshold = 10;
+//static constexpr double fastableTimeDiffThreshold = 0.5;
+
+struct setFastABLE {
+    double patchSize;
+    int compareLength;
+    double safetyThresholdRatio;
+    double earlyAcceptedVicinity;
+    double consistencyThreshold;
+    double acceptedVicinityThreshold;
+    double timeDiffThreshold;
+};
 
 // Graph edges
-#define EDGE_PRIOR_VAL 0.65 // Assumed prior step length - 0.65 meters
-#define EDGE_PRIOR_INF_MAT_WEIGHT 200 // Weight assigned to the prior step length
-#define EDGE_WKNN_INF_MAT_WEIGHT 10 // Weight assigned to the WiFi
-#define EDGE_PDR_INF_MAT_METRIC_WEIGHT 1 // Weight assigned to metric part of the PDR
-#define EDGE_PDR_INF_MAT_ORIENT_WEIGHT 15 // Weight assigned to orientation part of the PDR
-#define EDGE_WALL_PENALTY 10 // Penalty weight of EDGE_WALL
-#define EDGE_VPR_INF_MAT_WEIGHT 10 // Penalty weight of EDGE_VPR
+//#define EDGE_PRIOR_VAL 0.65 // Assumed prior step length - 0.65 meters
+//#define EDGE_PRIOR_INF_MAT_WEIGHT 200 // Weight assigned to the prior step length
+//#define EDGE_WKNN_INF_MAT_WEIGHT 10 // Weight assigned to the WiFi
+//#define EDGE_PDR_INF_MAT_METRIC_WEIGHT 1 // Weight assigned to metric part of the PDR
+//#define EDGE_PDR_INF_MAT_ORIENT_WEIGHT 15 // Weight assigned to orientation part of the PDR
+//#define EDGE_WALL_PENALTY 10
+//#define EDGE_VPR_INF_MAT_WEIGHT 10
 
 // Running settings
 struct settings {
     bool interUserConnections;
     bool stepLengthEstimation;
     double mapKeepPercent;
+
+    double EDGE_PRIOR_VAL; // Assumed prior step length - 0.65 meters
+    double EDGE_PRIOR_INF_MAT_WEIGHT; // Weight assigned to the prior step length
+    double EDGE_WKNN_INF_MAT_WEIGHT;  // Weight assigned to the WiFi
+    double EDGE_PDR_INF_MAT_METRIC_WEIGHT; // Weight assigned to metric part of the PDR
+    double EDGE_PDR_INF_MAT_ORIENT_WEIGHT; // Weight assigned to orientation part of the PDR
+    double EDGE_WALL_PENALTY; // Penalty weight of EDGE_WALL
+    double EDGE_VPR_INF_MAT_WEIGHT; // Penalty weight of EDGE_VPR
+
+    setFastABLE fastAble;
 };
 
 // Additional parameters
