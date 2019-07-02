@@ -48,31 +48,28 @@ parameterFileName = "parameters.txt";
 #interUserConnections = ["false", "true", "false", "true", "false", "true", "false", "true", "false", "true", "false", "true"];
 #mapKeepPercent = [0.5, 0.5, 0.6, 0.6, 0.7, 0.7, 0.8, 0.8, 0.9, 0.9, 1.0, 1.0];
 #stepLengthEstimation = ["true", "true", "true", "true", "true", "true", "true", "true", "true", "true", "true", "true"];
-runsPerSequence = 1;
-# interUserConnections = ["false", "false", "false", "false", "false", "false", "false", "false"];
-# stepLengthEstimation = ["false", "false", "false", "false", "false", "false", "false", "false"];
-# mapKeepPercent = [0.5, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0];
-# vprWeight = [0.0, 0.0, 10.0, 10.0, 0.0, 0.0, 10.0, 10.0];
-# wallWeight = [0.0, 10.0, 0.0, 10.0, 0.0, 10.0, 0.0, 10.0];
-# interUserConnections = ["false", "false", "false", "false", "false", "false", "false", "false", "false", "false", "false", "false"];
-# stepLengthEstimation = ["false", "false", "false", "false", "false", "false", "false", "false", "false", "false", "false", "false"];
-# mapKeepPercent = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
-# vprWeight = [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0];
-# wallWeight = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-# fa_safetyThresholdRatio = [1.1, 1.2, 1.4, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2];
-# fa_earlyAcceptedVicinity = [5, 5, 5, 4, 5, 6, 5, 5, 5, 5, 5, 5];
-# fa_consistencyThreshold = [3, 3, 3, 3, 3, 3, 2, 3, 4, 3, 3, 3];
-# fa_acceptedVicinityThreshold = [10, 10, 10, 10, 10, 10, 10, 10, 10, 3, 5, 10];
 
-interUserConnections = ["false"];
-stepLengthEstimation = ["false"];
-mapKeepPercent = [1.0];
-vprWeight = [10.0];
-wallWeight = [0.0];
-fa_safetyThresholdRatio = [1.2];
-fa_earlyAcceptedVicinity = [5];
-fa_consistencyThreshold = [3];
-fa_acceptedVicinityThreshold = [10];
+runsPerSequence = 10;
+
+interUserConnections = ["false", "false", "false", "false", "false", "false", "false", "false", "false", "false", "false", "false"];
+stepLengthEstimation = ["false", "false", "false", "false", "false", "false", "false", "false", "false", "false", "false", "false"];
+mapKeepPercent = [0.5, 0.75, 1.0, 0.5, 0.75, 1.0, 0.5, 0.75, 1.0, 0.5, 0.75, 1.0];
+vprWeight = [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0];
+wallWeight = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+fa_safetyThresholdRatio = [1.0, 1.1, 1.4, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2];
+fa_earlyAcceptedVicinity = [5, 5, 5, 3, 4, 6, 5, 5, 5, 5, 5, 5];
+fa_consistencyThreshold = [3, 3, 3, 3, 3, 3, 1, 2, 4, 3, 3, 3];
+fa_acceptedVicinityThreshold = [10, 10, 10, 10, 10, 10, 10, 10, 10, 3, 5, 7];
+
+# interUserConnections = ["false"];
+# stepLengthEstimation = ["false"];
+# mapKeepPercent = [1.0];
+# vprWeight = [10.0];
+# wallWeight = [0.0];
+# fa_safetyThresholdRatio = [1.2];
+# fa_earlyAcceptedVicinity = [5];
+# fa_consistencyThreshold = [3];
+# fa_acceptedVicinityThreshold = [10];
 
 # For chosen parameters
 for (iUC, mKP, sLE, vpr, wall, faSTR, faEAC, faCT, faAVT) in zip(interUserConnections, mapKeepPercent, stepLengthEstimation,
