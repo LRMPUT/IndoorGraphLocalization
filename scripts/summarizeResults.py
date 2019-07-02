@@ -45,14 +45,14 @@ summary = sorted(summary, key=lambda summary: summary[0]);
 
 groups = [];
 
-print "Config".ljust(60) + "RMSE".ljust(8) + "AvgErr".ljust(8) + "Sigma".ljust(8) + "MaxErr".ljust(8)
+print "Config".ljust(100) + "RMSE".ljust(8) + "AvgErr".ljust(8) + "Sigma".ljust(8) + "MaxErr".ljust(8)
 for line in summary:
     k = line[0].rfind('_');
     groupName = line[0][:k];
     if groupName not in groups:
         groups.append(groupName);
 
-    print str(line[0]).ljust(60) + str(line[1]).ljust(8) + str(line[2]).ljust(8) + str(line[3]).ljust(8) + str(line[4]).ljust(8)
+    print str(line[0]).ljust(100) + str(line[1]).ljust(8) + str(line[2]).ljust(8) + str(line[3]).ljust(8) + str(line[4]).ljust(8)
 
 print "--------------"
 
@@ -71,5 +71,5 @@ for group in groups:
             MaxErr = MaxErr + line[4];
             count = count + 1;
 
-    print group.ljust(60) + str(round(RMSE/count,2)).ljust(8) + str(round(AvgErr/count,2)).ljust(8) + str(round(Sigma/count,2)).ljust(8) + str(round(MaxErr/count,2)).ljust(8)
+    print group.ljust(100) + str(round(RMSE/count,2)).ljust(8) + str(round(AvgErr/count,2)).ljust(8) + str(round(Sigma/count,2)).ljust(8) + str(round(MaxErr/count,2)).ljust(8)
 

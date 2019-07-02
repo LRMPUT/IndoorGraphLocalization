@@ -246,7 +246,7 @@ int main() {
     DataReadWrite::sparsifyMapPercent(wifiMap, set.mapKeepPercent);
 
     // Creating am empty graph
-    GraphManager graphManager(verbose);
+    GraphManager graphManager(graphRoutes, verbose);
 
     // Adding WiFi map to graph as fixed
     graphManager.addVerticesForInitialWiFiMap(wifiMap);

@@ -17,7 +17,7 @@
 #include "graphManager.h"
 #include "g2o/core/sparse_optimizer_terminate_action.h"
 
-GraphManager::GraphManager(bool verbose) : verbose(verbose){
+GraphManager::GraphManager(GraphRoutes graphRoutes, bool verbose) : verbose(verbose), graphRoutes(graphRoutes){
     optimizer.setVerbose(verbose);
 
     // Creating linear solver
@@ -310,6 +310,13 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
 //                std::cout << "vPre: " << vPre->estimate()[0] << " " << vPre->estimate()[1] << std::endl;
 //                std::cout << "vPost: " << vPost->estimate()[0] << " " << vPost->estimate()[1] << std::endl;
 
+                std::vector<std::pair<double, double>> path = graphRoutes.computePath(
+                        std::make_pair(vPre->estimate()[0], vPre->estimate()[1]),
+                        std::make_pair(vPost->estimate()[0], vPost->estimate()[1]));
+
+
+
+
 
                 VertexSE2 *v1 = dynamic_cast<VertexSE2 *>(optimizer.vertex(idPre));
 
@@ -327,6 +334,11 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
                 double t = 0.4 * t_nom / t_denom;
 
                 Eigen::Vector2d corectedLocation = Eigen::Vector2d(vPre->estimate()[0], vPre->estimate()[1]) + t * userDirection;
+
+                // TODO: overwrite from graph
+//                corectedLocation[0] = path.back().first;
+//                corectedLocation[1] = path.back().second;
+
 
                 Eigen::Matrix<double, 3, 1> correctedEstimate;
                 correctedEstimate << corectedLocation[0], corectedLocation[1], vPost->estimate()[2];

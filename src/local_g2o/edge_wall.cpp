@@ -28,7 +28,7 @@ namespace g2o{
             double d1 = distanceToLine(w1, w2, p1);
             double d2 = distanceToLine(w1, w2, p2);
 
-            static double wallVicinityThreshold = 1.5;
+            static double wallVicinityThreshold = 0.3;
 
             // User crosses the wall
             if ( doIntersect(w1, w2, p1, p2) ) {

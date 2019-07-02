@@ -54,14 +54,30 @@ runsPerSequence = 1;
 # mapKeepPercent = [0.5, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0];
 # vprWeight = [0.0, 0.0, 10.0, 10.0, 0.0, 0.0, 10.0, 10.0];
 # wallWeight = [0.0, 10.0, 0.0, 10.0, 0.0, 10.0, 0.0, 10.0];
+# interUserConnections = ["false", "false", "false", "false", "false", "false", "false", "false", "false", "false", "false", "false"];
+# stepLengthEstimation = ["false", "false", "false", "false", "false", "false", "false", "false", "false", "false", "false", "false"];
+# mapKeepPercent = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+# vprWeight = [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0];
+# wallWeight = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+# fa_safetyThresholdRatio = [1.1, 1.2, 1.4, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2];
+# fa_earlyAcceptedVicinity = [5, 5, 5, 4, 5, 6, 5, 5, 5, 5, 5, 5];
+# fa_consistencyThreshold = [3, 3, 3, 3, 3, 3, 2, 3, 4, 3, 3, 3];
+# fa_acceptedVicinityThreshold = [10, 10, 10, 10, 10, 10, 10, 10, 10, 3, 5, 10];
+
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
 mapKeepPercent = [1.0];
 vprWeight = [10.0];
 wallWeight = [0.0];
+fa_safetyThresholdRatio = [1.2];
+fa_earlyAcceptedVicinity = [5];
+fa_consistencyThreshold = [3];
+fa_acceptedVicinityThreshold = [10];
 
 # For chosen parameters
-for (iUC, mKP, sLE, vpr, wall) in zip(interUserConnections, mapKeepPercent, stepLengthEstimation, vprWeight, wallWeight):
+for (iUC, mKP, sLE, vpr, wall, faSTR, faEAC, faCT, faAVT) in zip(interUserConnections, mapKeepPercent, stepLengthEstimation,
+                                                                     vprWeight, wallWeight,fa_safetyThresholdRatio, fa_earlyAcceptedVicinity,
+                                                                     fa_consistencyThreshold, fa_acceptedVicinityThreshold):
 
     # Changing parameters to selected values
     setYamlFile(parameterFileName, "interUserConnections ", iUC);
@@ -69,9 +85,15 @@ for (iUC, mKP, sLE, vpr, wall) in zip(interUserConnections, mapKeepPercent, step
     setYamlFile(parameterFileName, "stepLengthEstimation ", sLE);
     setYamlFile(parameterFileName, "EDGE_VPR_INF_MAT_WEIGHT ", vpr);
     setYamlFile(parameterFileName, "EDGE_WALL_PENALTY ", wall);
+    setYamlFile(parameterFileName, "FASTABLE_safetyThresholdRatio ", faSTR);
+    setYamlFile(parameterFileName, "FASTABLE_earlyAcceptedVicinity ", faEAC);
+    setYamlFile(parameterFileName, "FASTABLE_consistencyThreshold ", faCT);
+    setYamlFile(parameterFileName, "FASTABLE_acceptedVicinityThreshold ", faAVT);
+
 
     # Path depending on the parameters
-    dir = "iUC_" + str(iUC) + "_mKP_" + str(mKP) + "_sLE_" + str(sLE) + "_vpr_" + str(vpr) + "_wall_" + str(wall);
+    dir = "iUC_" + str(iUC) + "_mKP_" + str(mKP) + "_sLE_" + str(sLE) + "_vpr_" + str(vpr) + "_wall_" + str(wall) + \
+        "_faSTR_" + str(faSTR) + "_faEAC_" + str(faEAC) + "_faCT_" + str(faCT) + "_faAVT_" + str(faAVT);
 
     # For all selected sequences
     for i in range(0, runsPerSequence):

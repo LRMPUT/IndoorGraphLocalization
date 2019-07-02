@@ -53,6 +53,7 @@
 #include <mutex>
 #include "parameters.h"
 #include "wifiLocalization.h"
+#include "GraphRoutes.h"
 
 using namespace std;
 using namespace g2o;
@@ -60,7 +61,7 @@ using namespace g2o;
 
 class GraphManager {
 public:
-    GraphManager(bool verbose = false);
+    GraphManager(GraphRoutes graphRoutes, bool verbose = false);
 
     // Perform optimization for given number of iterations
     // Returns chi2 and 0 if not ok (e.g. 0 vertices)
@@ -144,6 +145,9 @@ private:
 
     // Initial id of the step length node (incremented by the addStepNode)
     int nextStepNodeId = STEP_NODE_ID_INCREMENT;
+
+    // Routes for wall initialization
+    GraphRoutes graphRoutes;
 };
 
 
