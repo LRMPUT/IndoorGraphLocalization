@@ -63,11 +63,11 @@ runsPerSequence = 1;
 
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
-mapKeepPercent = [1.0];
-vprWeight = [10.0];
-wallWeight = [0.0];
-wallVicinityThreshold = [0.1];
-wallInitType = [0];
+mapKeepPercent = [1.0, 0.5];
+vprWeight = [10.0, 0.0];
+wallWeight = [10.0, 0.0];
+wallVicinityThreshold = [0.1, 0.3, 1.0];
+wallInitType = [0, 1, 2];
 fa_compareLength = [50];
 fa_safetyThresholdRatio = [1.1];
 fa_earlyAcceptedVicinity = [5];
