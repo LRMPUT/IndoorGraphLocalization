@@ -76,9 +76,9 @@ runsPerSequence = 1;
 
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
-mapKeepPercent = [0.5, 1.0];
-vprWeight = [0.0, 10.0];
-wallWeight = [0.0, 10.0];
+mapKeepPercent = [1.0];
+vprWeight = [10.0];
+wallWeight = [0.0];
 wallVicinityThreshold = [0.1];
 wallInitType = [0, 1, 2];
 fa_compareLength = [50];
