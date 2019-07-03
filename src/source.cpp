@@ -451,27 +451,32 @@ int main() {
             } else if (timestamps[0] == imageTimestamp) {
 //                std::cout << "Img : " << imageTimestamp << std::endl;
 
-                // TODO: Processing image
-                LocationXY currentPose = graphManager.getLastPoseEstimate();
-                LocationXY bestLocationGuess = fastable.addNewTestingImage(testImage[imageIndex].image, currentPose);
+                // If it is turned off than it does not make sense to process it
+                if (set.EDGE_VPR_INF_MAT_WEIGHT > 0.001) {
 
-                if (bestLocationGuess.id >= 0 &&
-                    fabs(imageTimestamp - lastUserNodeTimestamp) < set.fastAble.timeDiffThreshold * 1e9) {
-                    std::cout << "VPR: trajIndex = " << trajIndex << "  vertexId = " << graphManager.getIdOfLastVertexPose()
-                              << "  LocationGuess = " << bestLocationGuess.id << " " << bestLocationGuess.x << " "
-                              << bestLocationGuess.y << std::endl;
+                    LocationXY currentPose = graphManager.getLastPoseEstimate();
+                    LocationXY bestLocationGuess = fastable.addNewTestingImage(testImage[imageIndex].image,
+                                                                               currentPose);
+
+                    if (bestLocationGuess.id >= 0 &&
+                        fabs(imageTimestamp - lastUserNodeTimestamp) < set.fastAble.timeDiffThreshold * 1e9) {
+                        std::cout << "VPR: trajIndex = " << trajIndex << "  vertexId = "
+                                  << graphManager.getIdOfLastVertexPose()
+                                  << "  LocationGuess = " << bestLocationGuess.id << " " << bestLocationGuess.x << " "
+                                  << bestLocationGuess.y << std::endl;
 
 
-                    // Is recognition in accepted distance to current pose?
-                    double distance = distL2(currentPose, bestLocationGuess);
+                        // Is recognition in accepted distance to current pose?
+                        double distance = distL2(currentPose, bestLocationGuess);
 
-                    if (distance < set.fastAble.acceptedVicinityThreshold) {
-                        int lastVertexPoseId = graphManager.getIdOfLastVertexPose();
-                        graphManager.addEdgeVPR(lastVertexPoseId, bestLocationGuess, set.EDGE_VPR_INF_MAT_WEIGHT);
+                        if (distance < set.fastAble.acceptedVicinityThreshold) {
+                            int lastVertexPoseId = graphManager.getIdOfLastVertexPose();
+                            graphManager.addEdgeVPR(lastVertexPoseId, bestLocationGuess, set.EDGE_VPR_INF_MAT_WEIGHT);
 
-                        // Optimize as new information is available
-                        if (online_optimization)
-                            graphManager.optimize(250);
+                            // Optimize as new information is available
+                            if (online_optimization)
+                                graphManager.optimize(250);
+                        }
                     }
                 }
 

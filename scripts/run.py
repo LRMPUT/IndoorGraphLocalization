@@ -49,7 +49,7 @@ parameterFileName = "parameters.txt";
 #mapKeepPercent = [0.5, 0.5, 0.6, 0.6, 0.7, 0.7, 0.8, 0.8, 0.9, 0.9, 1.0, 1.0];
 #stepLengthEstimation = ["true", "true", "true", "true", "true", "true", "true", "true", "true", "true", "true", "true"];
 
-runsPerSequence = 1;
+
 
 # interUserConnections = ["false", "false", "false", "false", "false", "false", "false", "false", "false", "false"];
 # stepLengthEstimation = ["false", "false", "false", "false", "false", "false", "false", "false", "false", "false"];
@@ -74,13 +74,14 @@ runsPerSequence = 1;
 # fa_consistencyThreshold = [3];
 # fa_acceptedVicinityThreshold = [10];
 
+runsPerSequence = 1;
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
-mapKeepPercent = [1.0];
-vprWeight = [10.0];
+mapKeepPercent = [0.2, 0.4, 0.6, 0.8, 1.0];
+vprWeight = [0.0, 10.0];
 wallWeight = [0.0];
 wallVicinityThreshold = [0.1];
-wallInitType = [0, 1, 2];
+wallInitType = [0];
 fa_compareLength = [50];
 fa_safetyThresholdRatio = [1.1];
 fa_earlyAcceptedVicinity = [5];
