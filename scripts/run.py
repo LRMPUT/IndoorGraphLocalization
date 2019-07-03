@@ -61,19 +61,31 @@ runsPerSequence = 1;
 # fa_consistencyThreshold = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3];
 # fa_acceptedVicinityThreshold = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
 
+# interUserConnections = ["false"];
+# stepLengthEstimation = ["false"];
+# mapKeepPercent = [1.0, 0.5];
+# vprWeight = [10.0, 0.0];
+# wallWeight = [10.0, 0.0];
+# wallVicinityThreshold = [0.1, 0.3, 1.0];
+# wallInitType = [0, 1, 2];
+# fa_compareLength = [50];
+# fa_safetyThresholdRatio = [1.1];
+# fa_earlyAcceptedVicinity = [5];
+# fa_consistencyThreshold = [3];
+# fa_acceptedVicinityThreshold = [10];
+
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
-mapKeepPercent = [1.0, 0.5];
-vprWeight = [10.0, 0.0];
-wallWeight = [10.0, 0.0];
-wallVicinityThreshold = [0.1, 0.3, 1.0];
+mapKeepPercent = [0.5, 1.0];
+vprWeight = [0.0, 10.0];
+wallWeight = [0.0, 10.0];
+wallVicinityThreshold = [0.1];
 wallInitType = [0, 1, 2];
 fa_compareLength = [50];
 fa_safetyThresholdRatio = [1.1];
 fa_earlyAcceptedVicinity = [5];
 fa_consistencyThreshold = [3];
 fa_acceptedVicinityThreshold = [10];
-
 
 # For chosen parameters
 # for (iUC, mKP, sLE, vpr, wall, faSTR, faEAC, faCT, faAVT) in zip(interUserConnections, mapKeepPercent, stepLengthEstimation,
@@ -138,6 +150,6 @@ for (iUC, mKP, sLE, vpr, wW, wVT, wIT, faCL, faSTR, faEAC, faCT, faAVT) in produ
         call('mv gtMap.png results/' + fullDir + '/', shell=True);
         call('mv traj*.png results/' + fullDir + '/', shell=True);
         call('mv wifi.png results/' + fullDir + '/', shell=True);
-        call('mv errors.txt results/' + fullDir + '/', shell=True);
+        call('mv errors*.txt results/' + fullDir + '/', shell=True);
 
 call('python scripts/summarizeResults.py', shell=True);

@@ -71,7 +71,7 @@ for line in summary:
             print "-".ljust(5),;
         else:
             print str(paramValues[index + 1]).ljust(5),;
-print
+    print
 
 print "--------------"
 
