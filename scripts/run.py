@@ -74,7 +74,7 @@ parameterFileName = "parameters.txt";
 # fa_consistencyThreshold = [3];
 # fa_acceptedVicinityThreshold = [10];
 
-runsPerSequence = 10;
+runsPerSequence = 1;
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
 mapKeepPercent = [0.2, 0.4, 0.6, 0.8, 1.0];
