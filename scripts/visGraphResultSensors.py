@@ -76,18 +76,18 @@ def dToSegment(segA, segB, p):
  
     # Closest point is a
     if c > 0.0 :
-        return dot( pa, pa );
+        return math.sqrt(dot( pa, pa ));
  
     bp = p - segB;
  
     # Closest point is b
     if dot( ba, bp ) > 0.0:
-        return dot( bp, bp );
+        return math.sqrt(dot( bp, bp ));
  
  
     # Closest point is between a and b
     e = pa - ba * (c / dot( ba, ba ));
-    return dot( e, e );
+    return math.sqrt(dot( e, e ));
  
 def findXYTheta(positions, id):
     for pos in positions:
@@ -110,7 +110,7 @@ def getColor(x, n):
 
 
 def drawGT(dirName, metaGtPositions, metaGtLists, scale, outputFileName):
-    gtCount = 15;
+    gtCount = 14;
 
     image = Image.open("dataset/map.png").convert('RGB')
     basewidth = 3049
@@ -349,7 +349,7 @@ def readGroundTruth(dirName):
 
     gtPositions = [];
     gtList = [];
-    for trajId in range (1,16):
+    for trajId in range (1,15):
         nodePositions = [];
         neighbourList = [];
         distance = 0;
@@ -451,13 +451,15 @@ def computeErrors(id, error):
     print("TrajID: %d\tRMSE: %.2f, Average error: %.2f, Sigma: %.2f, Max: %.2f, Third Quantile: %.2f" % (
     id+1, math.sqrt(sum2 / ile), sum / ile, od, max, np.quantile(error, 0.75)))
 
-    with open("errors.txt", "w") as text_file:
+    with open("errors_" + str(id) + ".txt", "w") as text_file:
         for e in error:
             text_file.write(str(e) + '\n');
 
 
 def errors(positions, gtPositions, gtList):
     errors = [[] for x in xrange(len(gtPositions))];
+
+
 
     for p in positions:
 
@@ -471,7 +473,14 @@ def errors(positions, gtPositions, gtList):
             for (id, list) in enumerate(gtPositions[trajId]):
                 for idN in gtList[trajId][id]:
                     if idN > id:
+
+
+
                         dist = dToSegment(np.asarray(gtPositions[trajId][id]), np.asarray(gtPositions[trajId][idN]), np.asarray(p[1:3]));
+
+                        # if trajId == 2:
+                        #     print dist, gtPositions[trajId][id], gtPositions[trajId][idN], p[1:3]
+
                         if dist < minDist:
                             minDist = dist;
             #print "Distance: " + str(minDist)

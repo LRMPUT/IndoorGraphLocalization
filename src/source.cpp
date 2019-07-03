@@ -274,8 +274,7 @@ int main() {
                                        "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_2",
                                        "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_sick_3",
                                        "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_1",
-                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_2",
-                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_3"};
+                                       "dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/ps_2"};
 //    std::vector<std::string> testTrajs{"dataset/2019_04_02_PUTMC_Floor3_Experia_trajs/mn_2"};
 
     // Processing each trajectory
