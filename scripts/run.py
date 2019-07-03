@@ -107,7 +107,7 @@ for (iUC, mKP, sLE, vpr, wW, wVT, wIT, faCL, faSTR, faEAC, faCT, faAVT) in produ
 
     # Path depending on the parameters
     dir = "iUC_" + str(iUC) + "_mKP_" + str(mKP) + "_sLE_" + str(sLE) + "_vpr_" + str(vpr) + "_wW_" + str(wW) + \
-        "_wVT_" + str(wVT) + "_faCL_" + str(faCL) + "_faSTR_" + str(faSTR) + "_faEAC_" + str(faEAC) + "_faCT_" + \
+        "_wVT_" + str(wVT) + "_wIT_" + str(wIT) + "_faCL_" + str(faCL) + "_faSTR_" + str(faSTR) + "_faEAC_" + str(faEAC) + "_faCT_" + \
           str(faCT) + "_faAVT_" + str(faAVT);
 
     # For all selected sequences
