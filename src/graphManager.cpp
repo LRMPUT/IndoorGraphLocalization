@@ -17,7 +17,7 @@
 #include "graphManager.h"
 #include "g2o/core/sparse_optimizer_terminate_action.h"
 
-GraphManager::GraphManager(GraphRoutes graphRoutes, bool verbose) : verbose(verbose), graphRoutes(graphRoutes){
+GraphManager::GraphManager(GraphRoutes graphRoutes, bool verbose) : verbose(verbose), graphRoutes(graphRoutes) {
     optimizer.setVerbose(verbose);
 
     // Creating linear solver
@@ -30,13 +30,13 @@ GraphManager::GraphManager(GraphRoutes graphRoutes, bool verbose) : verbose(verb
         linearSolver = g2o::make_unique<LinearSolverPCG<BlockSolverX::PoseMatrixType>>();
 
     // Stop conditions
-    g2o::SparseOptimizerTerminateAction* terminateAction = new g2o::SparseOptimizerTerminateAction;
+    g2o::SparseOptimizerTerminateAction *terminateAction = new g2o::SparseOptimizerTerminateAction;
     terminateAction->setGainThreshold(0.0); // 0.0000001
     terminateAction->setMaxIterations(250);
     optimizer.addPostIterationAction(terminateAction);
 
     // Creating Levenberg algorithm
-    OptimizationAlgorithmLevenberg* optimizationAlgorithm = new g2o::OptimizationAlgorithmLevenberg(
+    OptimizationAlgorithmLevenberg *optimizationAlgorithm = new g2o::OptimizationAlgorithmLevenberg(
             g2o::make_unique<g2o::BlockSolverX>(std::move(linearSolver))
     );
 
@@ -47,11 +47,11 @@ GraphManager::GraphManager(GraphRoutes graphRoutes, bool verbose) : verbose(verb
 
 double GraphManager::optimize(int iterationCount) {
     if (verbose)
-        std::cout << "[GraphManager::optimize] Vertices: " << optimizer.vertices().size() << " Edges: " << optimizer.edges().size() << std::endl;
+        std::cout << "[GraphManager::optimize] Vertices: " << optimizer.vertices().size() << " Edges: "
+                  << optimizer.edges().size() << std::endl;
 
     // No edges -> return
-    if ( optimizer.edges().size() == 0 )
-    {
+    if (optimizer.edges().size() == 0) {
         std::cout << "[GraphManager::optimize] Graph is empty!" << std::endl;
         return 0;
     }
@@ -154,8 +154,8 @@ int GraphManager::addVertexStepNodeWithPrior(const double stepPrior, bool fixed,
 
 
     g2o::EdgeOnePrior *ePrior = new g2o::EdgeOnePrior();
-    ePrior->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(currentStepNodeId)));
-    Eigen::Matrix<double,1,1> obs;
+    ePrior->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex *>(optimizer.vertex(currentStepNodeId)));
+    Eigen::Matrix<double, 1, 1> obs;
     obs << stepPrior;
     ePrior->setMeasurement(obs);
     ePrior->setInformation(Vector1::Identity() * infMatrixWeight);
@@ -173,7 +173,8 @@ void GraphManager::addVerticesForInitialWiFiMap(const std::vector<LocationWiFi> 
     }
 }
 
-void GraphManager::addEdgeWKNN(const int &id, const std::vector<std::pair<double, int>> &wknnWeights, double infMatrixWeight) {
+void GraphManager::addEdgeWKNN(const int &id, const std::vector<std::pair<double, int>> &wknnWeights,
+                               double infMatrixWeight) {
 
     const int k = wknnWeights.size();
     if (k >= 1) {
@@ -216,8 +217,9 @@ void GraphManager::addEdgeWKNN(const int &id, const std::vector<std::pair<double
     }
 }
 
-void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTime, double dangle, double weightXY, double weightTheta,
-        std::vector<Wall> walls, double wallPenalty) {
+void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTime, double dangle, double weightXY,
+                              double weightTheta,
+                              std::vector<Wall> walls, double wallPenalty, double wallVicinityThreshold, int wallInitType) {
 
     const g2o::VertexSE2 *vPre = dynamic_cast<const VertexSE2 *>(optimizer.vertex(idPre));
     const g2o::VertexOne *vStep = dynamic_cast<const VertexOne *>(optimizer.vertex(idStep));
@@ -231,13 +233,12 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
             std::cout << "PDR: " << estimatedStepLength << " " << dangle / 2.0 * 180.0 / M_PI << std::endl;
 
         // Guess of the next pose
-        // TODO: We should make sure that no wall edge is violated due to local minimums of optimization
-        double x = vPre->estimate()[0] + estimatedStepLength * freqTime * cos (averageAngle);
-        double y = vPre->estimate()[1] + estimatedStepLength * freqTime * sin (averageAngle);
+        double x = vPre->estimate()[0] + estimatedStepLength * freqTime * cos(averageAngle);
+        double y = vPre->estimate()[1] + estimatedStepLength * freqTime * sin(averageAngle);
         double theta = normalize_theta(vPre->estimate()[2] + dangle);
 
         // Adding new pose
-        const int idPost = addVertexPose(x,y,theta,false);
+        const int idPost = addVertexPose(x, y, theta, false);
 
         // Creating PDR edge
         g2o::EdgePDR *e = new g2o::EdgePDR();
@@ -252,9 +253,9 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
 
         // Information matrix
         Eigen::Matrix3d informationMatrix = Eigen::Matrix3d::Identity();
-        informationMatrix(0,0) = weightXY;
-        informationMatrix(1,1) = weightXY;
-        informationMatrix(2,2) = weightTheta;
+        informationMatrix(0, 0) = weightXY;
+        informationMatrix(1, 1) = weightXY;
+        informationMatrix(2, 2) = weightTheta;
         e->setInformation(informationMatrix);
 
         // Adding the edge
@@ -290,6 +291,9 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
         // Setting the wall information
         eWall->walls = walls;
 
+        // Setting the wall vicinity
+        eWall->wallVicinityThreshold = wallVicinityThreshold;
+
         // Measurement
         Eigen::Matrix<double, 1, 1> obsWall;
         obsWall << wallPenalty;
@@ -305,54 +309,68 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
             VertexSE2 *vPost = dynamic_cast<VertexSE2 *>(optimizer.vertex(idPost));
             bool intersect = eWall->doIntersect(wall, vPre, vPost);
             if (intersect) {
-                std::cout << "PROBLEM!" << std::endl;
+//                std::cout << "PROBLEM!" << std::endl;
 //
 //                std::cout << "vPre: " << vPre->estimate()[0] << " " << vPre->estimate()[1] << std::endl;
 //                std::cout << "vPost: " << vPost->estimate()[0] << " " << vPost->estimate()[1] << std::endl;
 
-                std::vector<std::pair<double, double>> path = graphRoutes.computePath(
-                        std::make_pair(vPre->estimate()[0], vPre->estimate()[1]),
-                        std::make_pair(vPost->estimate()[0], vPost->estimate()[1]));
+                // No changes to the initial location guess
+                if (wallInitType == 0)
+                    std::cout << "Wall crossed -> No modifications to the initial position" << std::endl;
 
+                // Initial guess from shorter PDR to prevent crossing
+                else if (wallInitType == 1) {
 
+                    VertexSE2 *v1 = dynamic_cast<VertexSE2 *>(optimizer.vertex(idPre));
 
+                    Eigen::Vector2d wallDirection(wall.endX - wall.startX, wall.endY - wall.startY);
+                    wallDirection.normalize();
 
+                    Eigen::Vector2d userDirection(vPost->estimate()[0] - vPre->estimate()[0],
+                                                  vPost->estimate()[1] - vPre->estimate()[1]);
+                    userDirection.normalize();
 
-                VertexSE2 *v1 = dynamic_cast<VertexSE2 *>(optimizer.vertex(idPre));
+                    double t_nom = (vPre->estimate()[0] - wall.startX) * wallDirection[1] -
+                                   (vPre->estimate()[1] - wall.startY) * wallDirection[0];
+                    double t_denom = userDirection[1] * wallDirection[0] - userDirection[0] * wallDirection[1];
 
-                Eigen::Vector2d wallDirection(wall.endX - wall.startX, wall.endY - wall.startY);
-                wallDirection.normalize();
+                    double t = 0.4 * t_nom / t_denom;
 
-                Eigen::Vector2d userDirection(vPost->estimate()[0] - vPre->estimate()[0],
-                                              vPost->estimate()[1] - vPre->estimate()[1]);
-                userDirection.normalize();
+                    Eigen::Vector2d corectedLocation =
+                            Eigen::Vector2d(vPre->estimate()[0], vPre->estimate()[1]) + t * userDirection;
 
-                double t_nom = (vPre->estimate()[0] - wall.startX) * wallDirection[1] -
-                               (vPre->estimate()[1] - wall.startY) * wallDirection[0];
-                double t_denom = userDirection[1] * wallDirection[0] - userDirection[0] * wallDirection[1];
+                    // Corrected guess
+                    Eigen::Matrix<double, 3, 1> correctedEstimate;
+                    correctedEstimate << corectedLocation[0], corectedLocation[1], vPost->estimate()[2];
+                    vPost->setEstimate(correctedEstimate);
+                }
 
-                double t = 0.4 * t_nom / t_denom;
+                // Initial guess from known routes in the graph
+                else if (wallInitType == 2) {
 
-                Eigen::Vector2d corectedLocation = Eigen::Vector2d(vPre->estimate()[0], vPre->estimate()[1]) + t * userDirection;
+                    // Finding path
+                    std::vector<std::pair<double, double>> path = graphRoutes.computePath(
+                            std::make_pair(vPre->estimate()[0], vPre->estimate()[1]),
+                            std::make_pair(vPost->estimate()[0], vPost->estimate()[1]));
 
-                // TODO: overwrite from graph
-//                corectedLocation[0] = path.back().first;
-//                corectedLocation[1] = path.back().second;
+                    // Corrected guess
+                    Eigen::Matrix<double, 3, 1> correctedEstimate;
+                    correctedEstimate << path.back().first, path.back().second, vPost->estimate()[2];
+                    vPost->setEstimate(correctedEstimate);
+                }
 
-
-                Eigen::Matrix<double, 3, 1> correctedEstimate;
-                correctedEstimate << corectedLocation[0], corectedLocation[1], vPost->estimate()[2];
-                vPost->setEstimate(correctedEstimate);
-
-
-
-                std::cout << "t: " << t << " userDirection: " <<  userDirection[0] << " " << userDirection[1] << std::endl;
-                std::cout << "corectedLocation: " << corectedLocation[0] << " " << corectedLocation[1] << std::endl;
-                std::cout << "Wall: (" << wall.startX << " " << wall.startY << ") (" << wall.endX << " " << wall.endY << ")" << std::endl;
+//                std::cout << "||| TEST : " << path.back().first << " " << path.back().second << " "
+//                          << vPost->estimate()[0] << " " << vPost->estimate()[1] << std::endl;
+//
+//                std::cout << "t: " << t << " userDirection: " << userDirection[0] << " " << userDirection[1]
+//                          << std::endl;
+//                std::cout << "corectedLocation: " << corectedLocation[0] << " " << corectedLocation[1] << std::endl;
+//                std::cout << "Wall: (" << wall.startX << " " << wall.startY << ") (" << wall.endX << " " << wall.endY
+//                          << ")" << std::endl;
 
                 // Let's check
                 bool intersect = eWall->doIntersect(wall, vPre, vPost);
-                if(intersect)
+                if (intersect)
                     std::cout << "PROBLEM remained !" << std::endl;
                 else {
                     std::cout << "PROBLEM was solved !" << std::endl;
@@ -385,8 +403,8 @@ void GraphManager::addEdgeVPR(const int &id, LocationXY imageRecognizedLocation,
 
         // Information matrix
         Eigen::Matrix2d informationMatrix = Eigen::Matrix2d::Identity();
-        informationMatrix(0,0) = weightXY;
-        informationMatrix(1,1) = weightXY;
+        informationMatrix(0, 0) = weightXY;
+        informationMatrix(1, 1) = weightXY;
         e->setInformation(informationMatrix);
 
         // Adding the edge
@@ -401,13 +419,13 @@ void GraphManager::addEdgeVPR(const int &id, LocationXY imageRecognizedLocation,
 int GraphManager::getIdOfLastVertexPose() {
     if (nextPoseId == 0)
         return 0;
-    return nextPoseId-1;
+    return nextPoseId - 1;
 }
 
 int GraphManager::getIdofLastVertexStepNode() {
     if (nextStepNodeId == 0)
         return 0;
-    return nextStepNodeId-1;
+    return nextStepNodeId - 1;
 }
 
 // Increase vertex ID for next user
@@ -415,7 +433,7 @@ void GraphManager::considerNextUser(int id) {
     nextPoseId = id * NEXT_USER_ID_INCREMENT;
 
     for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
-        g2o::OptimizableGraph::Edge *e =static_cast<g2o::OptimizableGraph::Edge *>(*it);
+        g2o::OptimizableGraph::Edge *e = static_cast<g2o::OptimizableGraph::Edge *>(*it);
         e->setLevel(1);
     }
 
@@ -424,7 +442,7 @@ void GraphManager::considerNextUser(int id) {
 // Optimize everything that was added to the graph
 void GraphManager::optimizeAll() {
     for (g2o::HyperGraph::EdgeSet::const_iterator it = optimizer.edges().begin(); it != optimizer.edges().end(); ++it) {
-        g2o::OptimizableGraph::Edge *e =static_cast<g2o::OptimizableGraph::Edge *>(*it);
+        g2o::OptimizableGraph::Edge *e = static_cast<g2o::OptimizableGraph::Edge *>(*it);
         e->setLevel(0);
     }
     optimize(150);
@@ -440,7 +458,7 @@ LocationXY GraphManager::getLastPoseEstimate() {
 LocationXY GraphManager::getPoseEstimate(int id) {
 
     const g2o::VertexSE2 *vertex = dynamic_cast<const VertexSE2 *>(optimizer.vertex(id));
-    if(vertex) {
+    if (vertex) {
         LocationXY result(vertex->estimate()[0], vertex->estimate()[1], id);
         return result;
     }
@@ -471,9 +489,8 @@ std::vector<VisEdge> GraphManager::getAllEdges() {
 
         VisEdge edge;
 
-        EdgeWKNN *e =dynamic_cast<EdgeWKNN *>(*it);
+        EdgeWKNN *e = dynamic_cast<EdgeWKNN *>(*it);
         if (e) {
-
 
 
             const g2o::VertexSE2 *vertex = dynamic_cast<const VertexSE2 *>(e->vertices()[0]);
@@ -490,25 +507,24 @@ std::vector<VisEdge> GraphManager::getAllEdges() {
 
             if (verbose)
                 std::cout << "GraphManager::getAllEdges() : EdgeWKNN " << edge.startX << " " << edge.startY << " " <<
-                        edge.endX << " " << edge.endY << std::endl;
-
+                          edge.endX << " " << edge.endY << std::endl;
 
 
             allEdges.push_back(edge);
         }
 
-        EdgeVPR *evpr =dynamic_cast<EdgeVPR *>(*it);
+        EdgeVPR *evpr = dynamic_cast<EdgeVPR *>(*it);
         if (evpr) {
 
             const g2o::VertexSE2 *vertex = dynamic_cast<const VertexSE2 *>(evpr->vertices()[0]);
             edge.startX = vertex->estimate()[0];
             edge.startY = vertex->estimate()[1];
 
-            double* vprEst = new double [2];
+            double *vprEst = new double[2];
             evpr->getMeasurementData(vprEst);
             edge.endX = vprEst[0];
             edge.endY = vprEst[1];
-            delete [] vprEst;
+            delete[] vprEst;
 
             edge.r = 0;
             edge.g = 0;
@@ -516,7 +532,7 @@ std::vector<VisEdge> GraphManager::getAllEdges() {
 
             if (verbose)
                 std::cout << "GraphManager::getAllEdgeVPR() : EdgeVPR" << edge.startX << " " << edge.startY << " " <<
-                        edge.endX << " " << edge.endY << std::endl;
+                          edge.endX << " " << edge.endY << std::endl;
 
             allEdges.push_back(edge);
         }

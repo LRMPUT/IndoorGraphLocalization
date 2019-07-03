@@ -56,15 +56,6 @@ struct setFastABLE {
     double timeDiffThreshold;
 };
 
-// Graph edges
-//#define EDGE_PRIOR_VAL 0.65 // Assumed prior step length - 0.65 meters
-//#define EDGE_PRIOR_INF_MAT_WEIGHT 200 // Weight assigned to the prior step length
-//#define EDGE_WKNN_INF_MAT_WEIGHT 10 // Weight assigned to the WiFi
-//#define EDGE_PDR_INF_MAT_METRIC_WEIGHT 1 // Weight assigned to metric part of the PDR
-//#define EDGE_PDR_INF_MAT_ORIENT_WEIGHT 15 // Weight assigned to orientation part of the PDR
-//#define EDGE_WALL_PENALTY 10
-//#define EDGE_VPR_INF_MAT_WEIGHT 10
-
 // Running settings
 struct settings {
     bool interUserConnections;
@@ -79,12 +70,15 @@ struct settings {
     double EDGE_WALL_PENALTY; // Penalty weight of EDGE_WALL
     double EDGE_VPR_INF_MAT_WEIGHT; // Penalty weight of EDGE_VPR
 
+    double wallVicinityThreshold;
+    int wallInitType;
+
     setFastABLE fastAble;
 };
 
 // Additional parameters
 static constexpr bool pdr_with_orientation_estimation = true;
-static constexpr bool add_not_localized_wifi_to_map = true;
+static constexpr bool add_not_localized_wifi_to_map = false;
 static constexpr bool online_optimization = true;
 static constexpr bool add_new_vertex_if_significant_orientation_change = false;
 static constexpr double significant_orientation_change_threshold = 45.0 * 3.1415265 / 180.0;

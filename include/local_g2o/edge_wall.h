@@ -49,6 +49,7 @@ namespace g2o {
         virtual double initialEstimatePossible(const OptimizableGraph::VertexSet& fixed, OptimizableGraph::Vertex* toEstimate);
 
         std::vector< Wall > walls;
+        double wallVicinityThreshold;
 
         struct Point
         {
@@ -195,6 +196,9 @@ namespace g2o {
 
             return sqrt(pow(dx,2) + pow(dy,2));
         }
+
+
+
     };
 
 

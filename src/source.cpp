@@ -199,10 +199,10 @@ void computeAndAddEdgePDR(GraphManager &graphManager, vector<double> &accWindow,
         // Do we intent on using orientation in the optimization
         if (pdr_with_orientation_estimation)
             graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, orientDiff, set.EDGE_PDR_INF_MAT_METRIC_WEIGHT,
-                set.EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, set.EDGE_WALL_PENALTY);
+                set.EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, set.EDGE_WALL_PENALTY, set.wallVicinityThreshold, set.wallInitType);
         else
             graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, 0, set.EDGE_PDR_INF_MAT_METRIC_WEIGHT,
-                set.EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, set.EDGE_WALL_PENALTY);
+                set.EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, set.EDGE_WALL_PENALTY, set.wallVicinityThreshold, set.wallInitType);
 
         std::vector<std::pair<double,double>> empty;
         visualize(graphManager, wallMap, buildingPlan, graphRoutes, empty, true);
@@ -420,16 +420,16 @@ int main() {
                     int lastVertexPoseId = graphManager.getIdOfLastVertexPose();
                     graphManager.addEdgeWKNN(lastVertexPoseId, edgeWknnWeights, set.EDGE_WKNN_INF_MAT_WEIGHT);
 
-                    if(wifiNum > 1) {
-
-                        // Computing a route
-                        LocationXY startPose = graphManager.getPoseEstimate(prevWiFiId);
-                        LocationXY currPose = graphManager.getLastPoseEstimate();
-                        lastPlannedPath = graphRoutes.computePath(std::make_pair(startPose.x, startPose.y), std::make_pair(currPose.x, currPose.y));
-
-                        // Updating previous WiFi id
-                        prevWiFiId = lastVertexPoseId;
-                    }
+//                    if(wifiNum > 1) {
+//
+//                        // Computing a route
+//                        LocationXY startPose = graphManager.getPoseEstimate(prevWiFiId);
+//                        LocationXY currPose = graphManager.getLastPoseEstimate();
+//                        lastPlannedPath = graphRoutes.computePath(std::make_pair(startPose.x, startPose.y), std::make_pair(currPose.x, currPose.y));
+//
+//                        // Updating previous WiFi id
+//                        prevWiFiId = lastVertexPoseId;
+//                    }
 
                 }
 

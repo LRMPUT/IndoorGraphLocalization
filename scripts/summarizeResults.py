@@ -38,21 +38,40 @@ for root, dirs, files in os.walk("results/"):
             Sigma = float (result[8]);
             MaxErr = float(result[10]);
 
-            summary.append([configName, RMSE, AvgErr, Sigma, MaxErr]);
+            summary.append([RMSE, AvgErr, Sigma, MaxErr, configName]);
 
 
-summary = sorted(summary, key=lambda summary: summary[0]);
+summary = sorted(summary, key=lambda summary: summary[4]);
 
 groups = [];
 
-print "Config".ljust(100) + "RMSE".ljust(8) + "AvgErr".ljust(8) + "Sigma".ljust(8) + "MaxErr".ljust(8)
+print "RMSE".ljust(8) + "AvgErr".ljust(8) + "Sigma".ljust(8) + "MaxErr".ljust(8),
+
+parameters = ["iUC", "mKP", "sLE", "vpr", "wW", "wVT", "wIT", "faCL", "faSTR", "faEAC", "faCT", "faAVT"];
+
+for param in parameters:
+    print param.ljust(5),
+print
+
+
 for line in summary:
-    k = line[0].rfind('_');
-    groupName = line[0][:k];
+    k = line[4].rfind('_');
+    groupName = line[4][:k];
     if groupName not in groups:
         groups.append(groupName);
 
-    print str(line[0]).ljust(100) + str(line[1]).ljust(8) + str(line[2]).ljust(8) + str(line[3]).ljust(8) + str(line[4]).ljust(8)
+    print str(line[0]).ljust(8) + str(line[1]).ljust(8) + str(line[2]).ljust(8) + str(line[3]).ljust(8),
+
+    paramValues = line[4].split('_');
+
+
+    for p in parameters:
+        index = paramValues.index(p) if p in paramValues else -1;
+        if index == -1:
+            print "-".ljust(5),;
+        else:
+            print str(paramValues[index + 1]).ljust(5),;
+print
 
 print "--------------"
 
@@ -64,12 +83,24 @@ for group in groups:
     count = 0;
 
     for line in summary:
-        if group in line[0]:
-            RMSE = RMSE + line[1];
-            AvgErr = AvgErr + line[2];
-            Sigma = Sigma + line[3];
-            MaxErr = MaxErr + line[4];
+        if group in line[4]:
+            RMSE = RMSE + line[0];
+            AvgErr = AvgErr + line[1];
+            Sigma = Sigma + line[2];
+            MaxErr = MaxErr + line[3];
             count = count + 1;
 
-    print group.ljust(100) + str(round(RMSE/count,2)).ljust(8) + str(round(AvgErr/count,2)).ljust(8) + str(round(Sigma/count,2)).ljust(8) + str(round(MaxErr/count,2)).ljust(8)
+    print str(round(RMSE/count,2)).ljust(8) + str(round(AvgErr/count,2)).ljust(8) + str(round(Sigma/count,2)).ljust(8) + \
+          str(round(MaxErr/count,2)).ljust(8),\
+
+    paramValues = group.split('_');
+
+    for p in parameters:
+        index = paramValues.index(p) if p in paramValues else -1;
+        if index == -1:
+            print "-".ljust(5),;
+        else:
+            print str(paramValues[index + 1]).ljust(5),;
+
+    print
 

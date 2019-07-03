@@ -82,6 +82,15 @@ void DataReadWrite::readParameters(std::string filename, settings &set) {
                 set.EDGE_VPR_INF_MAT_WEIGHT = std::stod(line);
             }
 
+            else if (line == "wallVicinityThreshold") {
+                getline(file, line);
+                set.wallVicinityThreshold = std::stod(line);
+            }
+            else if (line == "wallInitType") {
+                getline(file, line);
+                set.wallInitType = std::stoi(line);
+            }
+
             else if (line == "FASTABLE_patchSize") {
                 getline(file, line);
                 set.fastAble.patchSize = std::stod(line);
@@ -125,6 +134,9 @@ void DataReadWrite::readParameters(std::string filename, settings &set) {
     std::cout << "\tmapKeepPercent = " << set.mapKeepPercent << std::endl;
     std::cout << "\tEDGE_WALL_PENALTY = " << set.EDGE_WALL_PENALTY << std::endl;
     std::cout << "\tEDGE_VPR_INF_MAT_WEIGHT = " << set.EDGE_VPR_INF_MAT_WEIGHT << std::endl;
+
+    std::cout << "\twallVicinityThreshold = " << set.wallVicinityThreshold << std::endl;
+    std::cout << "\twallInitType = " << set.wallInitType << std::endl;
 
     std::cout << "\tFastABLE:" << std::endl;
     std::cout << "\t\tpatchSize = " << set.fastAble.patchSize << std::endl;
