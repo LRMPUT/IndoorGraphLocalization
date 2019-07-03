@@ -74,11 +74,11 @@ parameterFileName = "parameters.txt";
 # fa_consistencyThreshold = [3];
 # fa_acceptedVicinityThreshold = [10];
 
-runsPerSequence = 1;
+runsPerSequence = 10;
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
 mapKeepPercent = [0.2, 0.4, 0.6, 0.8, 1.0];
-vprWeight = [0.0, 10.0];
+vprWeight = [0.0];
 wallWeight = [0.0];
 wallVicinityThreshold = [0.1];
 wallInitType = [0];
@@ -86,7 +86,7 @@ fa_compareLength = [50];
 fa_safetyThresholdRatio = [1.1];
 fa_earlyAcceptedVicinity = [5];
 fa_consistencyThreshold = [3];
-fa_acceptedVicinityThreshold = [10];
+fa_acceptedVicinityThreshold = [5];
 
 # For chosen parameters
 # for (iUC, mKP, sLE, vpr, wall, faSTR, faEAC, faCT, faAVT) in zip(interUserConnections, mapKeepPercent, stepLengthEstimation,
