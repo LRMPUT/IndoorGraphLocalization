@@ -78,14 +78,14 @@ runsPerSequence = 10;
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
 mapKeepPercent = [0.2, 0.4, 0.6, 0.8, 1.0];
-vprWeight = [0.0];
+vprWeight = [5.0, 10.0, 15.0];
 wallWeight = [0.0];
 wallVicinityThreshold = [0.1];
 wallInitType = [0];
-fa_compareLength = [50];
-fa_safetyThresholdRatio = [1.1];
-fa_earlyAcceptedVicinity = [5];
-fa_consistencyThreshold = [3];
+fa_compareLength = [40, 50, 60];
+fa_safetyThresholdRatio = [1.0, 1.1, 1.2];
+fa_earlyAcceptedVicinity = [3, 5, 7];
+fa_consistencyThreshold = [2, 3];
 fa_acceptedVicinityThreshold = [5];
 
 # For chosen parameters
