@@ -74,18 +74,19 @@ parameterFileName = "parameters.txt";
 # fa_consistencyThreshold = [3];
 # fa_acceptedVicinityThreshold = [10];
 
-runsPerSequence = 1;
+runsPerSequence = 10;
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
-mapKeepPercent = [0.2, 0.4, 0.6, 0.8, 1.0];
-vprWeight = [5.0, 10.0, 15.0];
-wallWeight = [0.0];
-wallVicinityThreshold = [0.1];
-wallInitType = [0];
-fa_compareLength = [40, 50, 60];
-fa_safetyThresholdRatio = [1.0, 1.1, 1.2];
-fa_earlyAcceptedVicinity = [3, 5, 7];
-fa_consistencyThreshold = [2, 3];
+mapKeepPercent = [1.0];
+vprWeight = [0.0];
+wallWeight = [1.0, 5.0, 10.0];
+wallVicinityThreshold = [0.1, 0.2, 0.5];
+wallInitType = [0, 1, 2];
+wallErrorType = [0, 1];
+fa_compareLength = [50];
+fa_safetyThresholdRatio = [1.1];
+fa_earlyAcceptedVicinity = [5];
+fa_consistencyThreshold = [3];
 fa_acceptedVicinityThreshold = [5];
 
 # For chosen parameters
@@ -93,10 +94,11 @@ fa_acceptedVicinityThreshold = [5];
 #                                                                      vprWeight, wallWeight,fa_safetyThresholdRatio, fa_earlyAcceptedVicinity,
 #                                                                      fa_consistencyThreshold, fa_acceptedVicinityThreshold):
 
-for (iUC, mKP, sLE, vpr, wW, wVT, wIT, faCL, faSTR, faEAC, faCT, faAVT) in product(interUserConnections, mapKeepPercent,
+for (iUC, mKP, sLE, vpr, wW, wVT, wIT, wET, faCL, faSTR, faEAC, faCT, faAVT) in product(interUserConnections, mapKeepPercent,
                                                                            stepLengthEstimation,
                                                                            vprWeight, wallWeight, wallVicinityThreshold,
-                                                                           wallInitType, fa_compareLength,
+                                                                           wallInitType, wallErrorType,
+                                                                           fa_compareLength,
                                                                            fa_safetyThresholdRatio,
                                                                            fa_earlyAcceptedVicinity,
                                                                            fa_consistencyThreshold,
@@ -111,6 +113,7 @@ for (iUC, mKP, sLE, vpr, wW, wVT, wIT, faCL, faSTR, faEAC, faCT, faAVT) in produ
     setYamlFile(parameterFileName, "EDGE_WALL_PENALTY ", wW);
     setYamlFile(parameterFileName, "wallVicinityThreshold ", wVT);
     setYamlFile(parameterFileName, "wallInitType ", wIT);
+    setYamlFile(parameterFileName, "wallErrorType ", wET);
     setYamlFile(parameterFileName, "FASTABLE_compareLength ", faCL);
     setYamlFile(parameterFileName, "FASTABLE_safetyThresholdRatio ", faSTR);
     setYamlFile(parameterFileName, "FASTABLE_earlyAcceptedVicinity ", faEAC);
@@ -120,8 +123,8 @@ for (iUC, mKP, sLE, vpr, wW, wVT, wIT, faCL, faSTR, faEAC, faCT, faAVT) in produ
 
     # Path depending on the parameters
     dir = "iUC_" + str(iUC) + "_mKP_" + str(mKP) + "_sLE_" + str(sLE) + "_vpr_" + str(vpr) + "_wW_" + str(wW) + \
-        "_wVT_" + str(wVT) + "_wIT_" + str(wIT) + "_faCL_" + str(faCL) + "_faSTR_" + str(faSTR) + "_faEAC_" + str(faEAC) + "_faCT_" + \
-          str(faCT) + "_faAVT_" + str(faAVT);
+        "_wVT_" + str(wVT) + "_wIT_" + str(wIT) + "_wET_" + str(wET) + "_faCL_" + str(faCL) + "_faSTR_" + str(faSTR) + \
+          "_faEAC_" + str(faEAC) + "_faCT_" + str(faCT) + "_faAVT_" + str(faAVT);
 
     # For all selected sequences
     for i in range(0, runsPerSequence):
