@@ -88,7 +88,7 @@ public:
     // Adds the PDR edge from selected pose (idPre) with step length node (idStep) and measurement (freqTime, dangle)
     // Optionally it is possible to provide information about the walls with the wall penalty for wall crossing
     void addEdgePDR(const int &idPre, const int &idStep, double freqTime, double dangle, double weightXY, double weightTheta,
-                    std::vector<Wall> walls, double wallPenalty, double wallVicinityThreshold, int wallInitType);
+                    std::vector<Wall> walls, double wallPenalty, double wallVicinityThreshold, int wallInitType, int wallErrorType);
 
     void addEdgeVPR(const int &id, LocationXY imageRecognizedLocation, double weightXY);
 

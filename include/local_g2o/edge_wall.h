@@ -50,6 +50,7 @@ namespace g2o {
 
         std::vector< Wall > walls;
         double wallVicinityThreshold;
+        int wallErrorType;
 
         struct Point
         {

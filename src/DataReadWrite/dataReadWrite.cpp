@@ -90,6 +90,10 @@ void DataReadWrite::readParameters(std::string filename, settings &set) {
                 getline(file, line);
                 set.wallInitType = std::stoi(line);
             }
+            else if (line == "wallErrorType") {
+                getline(file, line);
+                set.wallErrorType = std::stoi(line);
+            }
 
             else if (line == "FASTABLE_patchSize") {
                 getline(file, line);
@@ -137,6 +141,7 @@ void DataReadWrite::readParameters(std::string filename, settings &set) {
 
     std::cout << "\twallVicinityThreshold = " << set.wallVicinityThreshold << std::endl;
     std::cout << "\twallInitType = " << set.wallInitType << std::endl;
+    std::cout << "\twallErrorType = " << set.wallErrorType << std::endl;
 
     std::cout << "\tFastABLE:" << std::endl;
     std::cout << "\t\tpatchSize = " << set.fastAble.patchSize << std::endl;

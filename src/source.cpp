@@ -196,13 +196,17 @@ void computeAndAddEdgePDR(GraphManager &graphManager, vector<double> &accWindow,
 
         lastOrientIndex = orientIndex;
 
+//        std::cout << "set.wallErrorType = " << set.wallErrorType << std::endl;
+
         // Do we intent on using orientation in the optimization
         if (pdr_with_orientation_estimation)
             graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, orientDiff, set.EDGE_PDR_INF_MAT_METRIC_WEIGHT,
-                set.EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, set.EDGE_WALL_PENALTY, set.wallVicinityThreshold, set.wallInitType);
+                set.EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, set.EDGE_WALL_PENALTY, set.wallVicinityThreshold, set.wallInitType,
+                set.wallErrorType);
         else
             graphManager.addEdgePDR(lastVertexPoseId, idStep, freqTime, 0, set.EDGE_PDR_INF_MAT_METRIC_WEIGHT,
-                set.EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, set.EDGE_WALL_PENALTY, set.wallVicinityThreshold, set.wallInitType);
+                set.EDGE_PDR_INF_MAT_ORIENT_WEIGHT, wallMap, set.EDGE_WALL_PENALTY, set.wallVicinityThreshold, set.wallInitType,
+                                    set.wallErrorType);
 
         std::vector<std::pair<double,double>> empty;
         visualize(graphManager, wallMap, buildingPlan, graphRoutes, empty, true);

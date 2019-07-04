@@ -77,32 +77,39 @@ parameterFileName = "parameters.txt";
 runsPerSequence = 10;
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
-mapKeepPercent = [1.0];
-vprWeight = [0.0];
-wallWeight = [1.0, 5.0, 10.0];
-wallVicinityThreshold = [0.1, 0.2, 0.5];
+mapKeepPercent = [0.2, 0.4, 0.6, 0.8, 1.0];
+vprWeight = [10.0];
+wallWeight = [0.0];
+wallVicinityThreshold = [0.1];
 wallInitType = [0, 1, 2];
-wallErrorType = [0, 1];
-fa_compareLength = [50];
-fa_safetyThresholdRatio = [1.1];
-fa_earlyAcceptedVicinity = [5];
-fa_consistencyThreshold = [3];
+wallErrorType = [0];
+fa_compareLength = [40, 50];
+fa_safetyThresholdRatio = [1.1, 1.2];
+fa_earlyAcceptedVicinity = [5, 7];
+fa_consistencyThreshold = [2, 3];
 fa_acceptedVicinityThreshold = [5];
 
 # For chosen parameters
-# for (iUC, mKP, sLE, vpr, wall, faSTR, faEAC, faCT, faAVT) in zip(interUserConnections, mapKeepPercent, stepLengthEstimation,
-#                                                                      vprWeight, wallWeight,fa_safetyThresholdRatio, fa_earlyAcceptedVicinity,
-#                                                                      fa_consistencyThreshold, fa_acceptedVicinityThreshold):
+for (iUC, mKP, sLE, vpr, wW, wVT, wIT, wET, faCL, faSTR, faEAC, faCT, faAVT) in zip(interUserConnections, mapKeepPercent,
+                                                                                        stepLengthEstimation,
+                                                                                        vprWeight, wallWeight, wallVicinityThreshold,
+                                                                                        wallInitType, wallErrorType,
+                                                                                        fa_compareLength,
+                                                                                        fa_safetyThresholdRatio,
+                                                                                        fa_earlyAcceptedVicinity,
+                                                                                        fa_consistencyThreshold,
+                                                                                        fa_acceptedVicinityThreshold):
 
-for (iUC, mKP, sLE, vpr, wW, wVT, wIT, wET, faCL, faSTR, faEAC, faCT, faAVT) in product(interUserConnections, mapKeepPercent,
-                                                                           stepLengthEstimation,
-                                                                           vprWeight, wallWeight, wallVicinityThreshold,
-                                                                           wallInitType, wallErrorType,
-                                                                           fa_compareLength,
-                                                                           fa_safetyThresholdRatio,
-                                                                           fa_earlyAcceptedVicinity,
-                                                                           fa_consistencyThreshold,
-                                                                           fa_acceptedVicinityThreshold):
+
+# for (iUC, mKP, sLE, vpr, wW, wVT, wIT, wET, faCL, faSTR, faEAC, faCT, faAVT) in product(interUserConnections, mapKeepPercent,
+#                                                                            stepLengthEstimation,
+#                                                                            vprWeight, wallWeight, wallVicinityThreshold,
+#                                                                            wallInitType, wallErrorType,
+#                                                                            fa_compareLength,
+#                                                                            fa_safetyThresholdRatio,
+#                                                                            fa_earlyAcceptedVicinity,
+#                                                                            fa_consistencyThreshold,
+#                                                                            fa_acceptedVicinityThreshold):
 
 
     # Changing parameters to selected values

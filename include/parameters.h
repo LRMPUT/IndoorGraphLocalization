@@ -37,15 +37,7 @@ static constexpr double freqMin = 1.3;
 static constexpr double freqMax = 2.2;
 static constexpr double fftMagThresh = 0.2;
 
-// FASTABLE
-//static constexpr double patchSize = 64;
-//static constexpr int compareLength = 50;
-//static constexpr double safetyThresholdRatio = 1.2;
-//static constexpr double earlyAcceptedVicinity = 5;
-//static constexpr double consistencyThreshold = 3;
-//static constexpr double acceptedVicinityThreshold = 10;
-//static constexpr double fastableTimeDiffThreshold = 0.5;
-
+// FastABLE
 struct setFastABLE {
     double patchSize;
     int compareLength;
@@ -72,6 +64,7 @@ struct settings {
 
     double wallVicinityThreshold;
     int wallInitType;
+    int wallErrorType;
 
     setFastABLE fastAble;
 };

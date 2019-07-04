@@ -28,20 +28,33 @@ namespace g2o{
             double d1 = distanceToLine(w1, w2, p1);
             double d2 = distanceToLine(w1, w2, p2);
 
-            // User crosses the wall
-            if ( doIntersect(w1, w2, p1, p2) ) {
 
-                // Crossing increases the error
+            // Only penalizing the second node, some vicinity
+            if(wallErrorType == 0) {
+                // User crosses the wall
+                if (doIntersect(w1, w2, p1, p2)) {
+
+                    // Crossing increases the error
 //                _error[0] += _measurement[0] * min(d1,d2);
-                _error[0] += _measurement[0] * (d2 + wallVicinityThreshold);
-//                std::cout << "Wall intersection in g2o! err = " << _error[0] << std::endl;
-            }
-            else if ( d2 < wallVicinityThreshold ) {
-                double tmp = wallVicinityThreshold - d2;
+                    _error[0] += _measurement[0] * (d2 + wallVicinityThreshold);
+                } else if (d2 < wallVicinityThreshold) {
+                    double tmp = wallVicinityThreshold - d2;
 
-                _error[0] += _measurement[0] * tmp;
+                    _error[0] += _measurement[0] * tmp;
+                }
             }
-//            else if (d1 < wallVicinityThreshold || d2 < wallVicinityThreshold) {
+
+            // Penalty for both nodes
+            else if (wallErrorType == 1) {
+                if (doIntersect(w1, w2, p1, p2)) {
+                    // Crossing increases the error
+                    _error[0] += _measurement[0] * min(d1,d2);
+                }
+            }
+
+
+
+            //            else if (d1 < wallVicinityThreshold || d2 < wallVicinityThreshold) {
 //                double tmp = std::max(wallVicinityThreshold - d2, wallVicinityThreshold - d1);
 //
 //                _error[0] += _measurement[0] * tmp;

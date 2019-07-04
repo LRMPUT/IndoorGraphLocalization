@@ -219,7 +219,8 @@ void GraphManager::addEdgeWKNN(const int &id, const std::vector<std::pair<double
 
 void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTime, double dangle, double weightXY,
                               double weightTheta,
-                              std::vector<Wall> walls, double wallPenalty, double wallVicinityThreshold, int wallInitType) {
+                              std::vector<Wall> walls, double wallPenalty, double wallVicinityThreshold, int wallInitType,
+                              int wallErrorType) {
 
     const g2o::VertexSE2 *vPre = dynamic_cast<const VertexSE2 *>(optimizer.vertex(idPre));
     const g2o::VertexOne *vStep = dynamic_cast<const VertexOne *>(optimizer.vertex(idStep));
@@ -293,6 +294,9 @@ void GraphManager::addEdgePDR(const int &idPre, const int &idStep, double freqTi
 
         // Setting the wall vicinity
         eWall->wallVicinityThreshold = wallVicinityThreshold;
+
+        // Setting the error type
+        eWall->wallErrorType = wallErrorType;
 
         // Measurement
         Eigen::Matrix<double, 1, 1> obsWall;

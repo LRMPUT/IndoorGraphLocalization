@@ -47,7 +47,7 @@ groups = [];
 
 print "RMSE".ljust(8) + "AvgErr".ljust(8) + "Sigma".ljust(8) + "MaxErr".ljust(8),
 
-parameters = ["iUC", "mKP", "sLE", "vpr", "wW", "wVT", "wIT", "faCL", "faSTR", "faEAC", "faCT", "faAVT"];
+parameters = ["iUC", "mKP", "sLE", "vpr", "wW", "wVT", "wIT", "wET", "faCL", "faSTR", "faEAC", "faCT", "faAVT"];
 
 for param in parameters:
     print param.ljust(5),
