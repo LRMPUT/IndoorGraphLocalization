@@ -108,8 +108,8 @@ print "++++++++++"
 
 
 
-
-for i in range(0,3):
+vals = [40, 50];
+for i in vals:
 
     RMSE = 0;
     AvgErr = 0;
@@ -117,7 +117,7 @@ for i in range(0,3):
     MaxErr = 0;
     count = 0;
 
-    p = "wIT";
+    p = "faCL";
     paramValues = -1;
 
     for line in summary:
@@ -137,4 +137,4 @@ for i in range(0,3):
                 MaxErr = MaxErr + line[3];
                 count = count + 1;
 
-    print p, paramV, round(RMSE/count,2), round(AvgErr/count,2)
+    print p, i, round(RMSE/count,2), round(AvgErr/count,2)
