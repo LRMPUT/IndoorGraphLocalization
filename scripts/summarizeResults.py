@@ -130,11 +130,11 @@ for i in range(0,3):
         else:
             paramV = int(paramValues[index + 1]);
 
-            if paramV == 1:
+            if paramV == i:
                 RMSE = RMSE + line[0];
                 AvgErr = AvgErr + line[1];
                 Sigma = Sigma + line[2];
                 MaxErr = MaxErr + line[3];
                 count = count + 1;
 
-    print p, paramV, RMSE, AvgErr
+    print p, paramV, round(RMSE/count,2), round(AvgErr/count,2)
