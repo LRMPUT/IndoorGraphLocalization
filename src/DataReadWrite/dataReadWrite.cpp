@@ -53,6 +53,10 @@ void DataReadWrite::readParameters(std::string filename, settings &set) {
                 getline(file, line);
                 set.mapKeepPercent = std::stod(line);
             }
+            else  if (line == "trajKeepPercent") {
+                getline(file, line);
+                set.trajKeepPercent = std::stod(line);
+            }
             else  if (line == "EDGE_PRIOR_VAL") {
                 getline(file, line);
                 set.EDGE_PRIOR_VAL = std::stod(line);
@@ -136,6 +140,7 @@ void DataReadWrite::readParameters(std::string filename, settings &set) {
     std::cout << "\tinterUserConnections = " << set.interUserConnections << std::endl;
     std::cout << "\tstepLengthEstimation = " << set.stepLengthEstimation << std::endl;
     std::cout << "\tmapKeepPercent = " << set.mapKeepPercent << std::endl;
+    std::cout << "\ttrajKeepPercent = " << set.trajKeepPercent << std::endl;
     std::cout << "\tEDGE_WALL_PENALTY = " << set.EDGE_WALL_PENALTY << std::endl;
     std::cout << "\tEDGE_VPR_INF_MAT_WEIGHT = " << set.EDGE_VPR_INF_MAT_WEIGHT << std::endl;
 

@@ -284,7 +284,7 @@ int main() {
     // Processing each trajectory
     std::vector<int> poseCounter(testTrajs.size(), 0), wifiCounter(testTrajs.size(), 0);
     for (int trajIndex = 0; trajIndex < testTrajs.size(); trajIndex++) {
-        int poseNum = 1, wifiNum = 0, prevWiFiId = 0;
+        int poseNum = 1, wifiNum = 0, prevWiFiId = 0, totalWiFi = 0;
 
         if (verbose)
             std::cout << "Trajectory id: " << trajIndex << std::endl;
@@ -418,10 +418,13 @@ int main() {
                         lastUserNodeTimestamp = wifiTimestamp;
                     }
 
-                    // Adding WiFi measurement. WiFi with deadzone is not used
-                    wifiNum++;
-                    int lastVertexPoseId = graphManager.getIdOfLastVertexPose();
-                    graphManager.addEdgeWKNN(lastVertexPoseId, edgeWknnWeights, set.EDGE_WKNN_INF_MAT_WEIGHT);
+                    // Skipping some WiFi measurement as simulation
+                    if (wifiNum == 0 || wifiNum * 1.0 / totalWiFi < set.trajKeepPercent) {
+
+                        // Adding WiFi measurement. WiFi with deadzone is not used
+                        wifiNum++;
+                        int lastVertexPoseId = graphManager.getIdOfLastVertexPose();
+                        graphManager.addEdgeWKNN(lastVertexPoseId, edgeWknnWeights, set.EDGE_WKNN_INF_MAT_WEIGHT);
 
 //                    if(wifiNum > 1) {
 //
@@ -433,7 +436,8 @@ int main() {
 //                        // Updating previous WiFi id
 //                        prevWiFiId = lastVertexPoseId;
 //                    }
-
+                    }
+                    totalWiFi ++;
                 }
 
                 // We are adding all locations with WiFi to map if chosen. Uncomment to add only correctly localized

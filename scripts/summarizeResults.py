@@ -47,7 +47,7 @@ groups = [];
 
 print "RMSE".ljust(8) + "AvgErr".ljust(8) + "Sigma".ljust(8) + "MaxErr".ljust(8),
 
-parameters = ["iUC", "mKP", "sLE", "vpr", "wW", "wVT", "wIT", "wET", "faCL", "faSTR", "faEAC", "faCT", "faAVT"];
+parameters = ["iUC", "mKP", "tKP", "sLE", "vpr", "wW", "wVT", "wIT", "wET", "faCL", "faSTR", "faEAC", "faCT", "faAVT"];
 
 for param in parameters:
     print param.ljust(5),
@@ -57,7 +57,7 @@ print
 for line in summary:
     k = line[4].rfind('_');
     groupName = line[4][:k];
-    groupName = groupName[:10];
+    groupName = groupName[:20];
     if groupName not in groups:
         groups.append(groupName);
 

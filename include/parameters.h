@@ -52,7 +52,7 @@ struct setFastABLE {
 struct settings {
     bool interUserConnections;
     bool stepLengthEstimation;
-    double mapKeepPercent;
+    double mapKeepPercent, trajKeepPercent;
 
     double EDGE_PRIOR_VAL; // Assumed prior step length - 0.65 meters
     double EDGE_PRIOR_INF_MAT_WEIGHT; // Weight assigned to the prior step length

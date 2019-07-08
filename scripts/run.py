@@ -77,44 +77,46 @@ parameterFileName = "parameters.txt";
 runsPerSequence = 10;
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
-mapKeepPercent = [0.2, 0.4, 0.6, 0.8, 1.0];
-vprWeight = [10.0];
+mapKeepPercent = [1.0];
+trajKeepPercent = [0.2, 0.4, 0.6, 0.8, 1.0];
+vprWeight = [0.0, 10.0];
 wallWeight = [0.0];
 wallVicinityThreshold = [0.1];
-wallInitType = [0, 1, 2];
+wallInitType = [0];
 wallErrorType = [0];
-fa_compareLength = [40, 50];
-fa_safetyThresholdRatio = [1.1, 1.2];
-fa_earlyAcceptedVicinity = [5, 7];
-fa_consistencyThreshold = [2, 3];
+fa_compareLength = [40];
+fa_safetyThresholdRatio = [1.2];
+fa_earlyAcceptedVicinity = [7];
+fa_consistencyThreshold = [3];
 fa_acceptedVicinityThreshold = [5];
 
 # For chosen parameters
-for (iUC, mKP, sLE, vpr, wW, wVT, wIT, wET, faCL, faSTR, faEAC, faCT, faAVT) in zip(interUserConnections, mapKeepPercent,
-                                                                                        stepLengthEstimation,
-                                                                                        vprWeight, wallWeight, wallVicinityThreshold,
-                                                                                        wallInitType, wallErrorType,
-                                                                                        fa_compareLength,
-                                                                                        fa_safetyThresholdRatio,
-                                                                                        fa_earlyAcceptedVicinity,
-                                                                                        fa_consistencyThreshold,
-                                                                                        fa_acceptedVicinityThreshold):
+# for (iUC, mKP, tKP, sLE, vpr, wW, wVT, wIT, wET, faCL, faSTR, faEAC, faCT, faAVT) in zip(interUserConnections, mapKeepPercent,
+#                                                                                         trajKeepPercent, stepLengthEstimation,
+#                                                                                         vprWeight, wallWeight, wallVicinityThreshold,
+#                                                                                         wallInitType, wallErrorType,
+#                                                                                         fa_compareLength,
+#                                                                                         fa_safetyThresholdRatio,
+#                                                                                         fa_earlyAcceptedVicinity,
+#                                                                                         fa_consistencyThreshold,
+#                                                                                         fa_acceptedVicinityThreshold):
 
+for (iUC, mKP, tKP, sLE, vpr, wW, wVT, wIT, wET, faCL, faSTR, faEAC, faCT, faAVT) in product(interUserConnections, mapKeepPercent,
+                                                                                         trajKeepPercent, stepLengthEstimation,
+                                                                                         vprWeight, wallWeight, wallVicinityThreshold,
+                                                                                         wallInitType, wallErrorType,
+                                                                                         fa_compareLength,
+                                                                                         fa_safetyThresholdRatio,
+                                                                                         fa_earlyAcceptedVicinity,
+                                                                                         fa_consistencyThreshold,
+                                                                                         fa_acceptedVicinityThreshold):
 
-# for (iUC, mKP, sLE, vpr, wW, wVT, wIT, wET, faCL, faSTR, faEAC, faCT, faAVT) in product(interUserConnections, mapKeepPercent,
-#                                                                            stepLengthEstimation,
-#                                                                            vprWeight, wallWeight, wallVicinityThreshold,
-#                                                                            wallInitType, wallErrorType,
-#                                                                            fa_compareLength,
-#                                                                            fa_safetyThresholdRatio,
-#                                                                            fa_earlyAcceptedVicinity,
-#                                                                            fa_consistencyThreshold,
-#                                                                            fa_acceptedVicinityThreshold):
 
 
     # Changing parameters to selected values
     setYamlFile(parameterFileName, "interUserConnections ", iUC);
     setYamlFile(parameterFileName, "mapKeepPercent ", mKP);
+    setYamlFile(parameterFileName, "trajKeepPercent ", tKP);
     setYamlFile(parameterFileName, "stepLengthEstimation ", sLE);
     setYamlFile(parameterFileName, "EDGE_VPR_INF_MAT_WEIGHT ", vpr);
     setYamlFile(parameterFileName, "EDGE_WALL_PENALTY ", wW);
@@ -129,7 +131,7 @@ for (iUC, mKP, sLE, vpr, wW, wVT, wIT, wET, faCL, faSTR, faEAC, faCT, faAVT) in 
 
 
     # Path depending on the parameters
-    dir = "iUC_" + str(iUC) + "_mKP_" + str(mKP) + "_sLE_" + str(sLE) + "_vpr_" + str(vpr) + "_wW_" + str(wW) + \
+    dir = "iUC_" + str(iUC) + "_mKP_" + str(mKP) + "_tKP_" + str(tKP) + "_sLE_" + str(sLE) + "_vpr_" + str(vpr) + "_wW_" + str(wW) + \
         "_wVT_" + str(wVT) + "_wIT_" + str(wIT) + "_wET_" + str(wET) + "_faCL_" + str(faCL) + "_faSTR_" + str(faSTR) + \
           "_faEAC_" + str(faEAC) + "_faCT_" + str(faCT) + "_faAVT_" + str(faAVT);
 
