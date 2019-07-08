@@ -85,10 +85,10 @@ wallVicinityThreshold = [0.1];
 wallInitType = [0];
 wallErrorType = [0];
 fa_compareLength = [40];
-fa_safetyThresholdRatio = [1.2];
-fa_earlyAcceptedVicinity = [7];
-fa_consistencyThreshold = [3];
-fa_acceptedVicinityThreshold = [5];
+fa_safetyThresholdRatio = [1.0, 1.2, 1.4];
+fa_earlyAcceptedVicinity = [7, 10, 15];
+fa_consistencyThreshold = [3, 5, 10];
+fa_acceptedVicinityThreshold = [5, 10];
 
 # For chosen parameters
 # for (iUC, mKP, tKP, sLE, vpr, wW, wVT, wIT, wET, faCL, faSTR, faEAC, faCT, faAVT) in zip(interUserConnections, mapKeepPercent,
