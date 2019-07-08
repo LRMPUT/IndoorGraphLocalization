@@ -57,7 +57,7 @@ print
 for line in summary:
     k = line[4].rfind('_');
     groupName = line[4][:k];
-    groupName = groupName[20:];
+    groupName = groupName[:10];
     if groupName not in groups:
         groups.append(groupName);
 
