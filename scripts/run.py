@@ -78,17 +78,17 @@ runsPerSequence = 10;
 interUserConnections = ["false"];
 stepLengthEstimation = ["false"];
 mapKeepPercent = [1.0];
-trajKeepPercent = [0.0];
+trajKeepPercent = [1.0];
 vprWeight = [10.0];
 wallWeight = [0.0];
 wallVicinityThreshold = [0.1];
 wallInitType = [0];
 wallErrorType = [0];
 fa_compareLength = [40];
-fa_safetyThresholdRatio = [1.0, 1.2, 1.4];
-fa_earlyAcceptedVicinity = [7, 10, 15];
-fa_consistencyThreshold = [3, 5, 10];
-fa_acceptedVicinityThreshold = [5, 10];
+fa_safetyThresholdRatio = [1.2];
+fa_earlyAcceptedVicinity = [7];
+fa_consistencyThreshold = [3];
+fa_acceptedVicinityThreshold = [5];
 
 # For chosen parameters
 # for (iUC, mKP, tKP, sLE, vpr, wW, wVT, wIT, wET, faCL, faSTR, faEAC, faCT, faAVT) in zip(interUserConnections, mapKeepPercent,
